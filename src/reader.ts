@@ -1,5 +1,5 @@
 import pkg from "../package.json";
-import { getPref, setPref } from "./utils/prefs";
+import { getPref } from "./utils/prefs";
 import { buildCSS, THEME_ORDER, PRESETS, ThemeKey } from "./themes";
 
 const STYLE_ID = "theme-switcher-style";
@@ -18,20 +18,49 @@ export function registerReaderUI() {
     // 工具栏按钮防重
     if (doc.getElementById("theme-switcher-button")) return;
 
+    // 是否显示工具栏按钮（默认 true）
+    const showToolbar = (getPref("showToolbar") as boolean);
+    if (showToolbar === false) return;
+
     const btn = doc.createElement("button");
     btn.id = "theme-switcher-button";
-    btn.textContent = "Theme";
-    btn.setAttribute("title", "切换阅读主题");
-    btn.style.padding = "2px 8px";
-    btn.style.border = "1px solid var(--grey-30, #ccc)";
-    btn.style.borderRadius = "4px";
-    btn.style.background = "var(--grey-10, #f5f5f5)";
+    btn.setAttribute("title", t("ts-tooltip"));
+    btn.setAttribute("aria-label", t("ts-tooltip"));
+    // 使用 SVG 图标，颜色继承 currentColor，随主题自适配
+    btn.innerHTML = `
+<span style="display:inline-flex;align-items:center;justify-content:center;">
+  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+    <path fill="currentColor" d="M11.5 13.5h5v-2h-5zM11 15q-.425 0-.712-.288T10 14v-3q0-.425.288-.712T11 10h6q.425 0 .713.288T18 11v3q0 .425-.288.713T17 15zm-7 5q-.825 0-1.412-.587T2 18V6q0-.825.588-1.412T4 4h16q.825 0 1.413.588T22 6v12q0 .825-.587 1.413T20 20zm0-2h16V8H4z"/>
+  </svg>
+</span>`;
+    // 尽量减少自定义样式，继承 Zotero 样式
+    btn.style.background = "transparent";
+    btn.style.border = "none";
+    btn.style.padding = "0 4px";
     btn.style.cursor = "pointer";
+    (btn.style as any).colorScheme = "light dark";
 
-    btn.addEventListener("click", () => {
+    let menuEl: HTMLDivElement | null = null;
+    const onCycle = () => {
       const next = nextTheme(getLastTheme() || (getPref("defaultTheme" as any) as ThemeKey) || "light");
       applyThemeToReader(reader, next);
       setLastTheme(next);
+    };
+    const onToggleMenu = () => {
+      if (menuEl && menuEl.isConnected) {
+        hideMenu();
+      } else {
+        showMenu();
+      }
+    };
+
+    const clickBehavior = (getPref("clickBehavior") as string) || "menu";
+    btn.addEventListener("click", () => {
+      if (clickBehavior === "cycle") {
+        onCycle();
+      } else {
+        onToggleMenu();
+      }
     });
 
     append(btn);
@@ -39,6 +68,28 @@ export function registerReaderUI() {
     // 初次渲染时，确保注入与主题应用
     const initial = (getLastTheme() || (getPref("defaultTheme" as any) as ThemeKey) || "light") as ThemeKey;
     ensureInjectedAndApply(reader, initial);
+
+    function showMenu() {
+      menuEl = buildMenu(doc, THEME_ORDER, (key) => {
+        applyThemeToReader(reader, key);
+        setLastTheme(key);
+        hideMenu();
+      });
+      positionMenuUnderButton(btn, menuEl!);
+      doc.body.appendChild(menuEl!);
+      setTimeout(() => {
+        doc.addEventListener("mousedown", onDocClick, { once: true });
+      }, 0);
+    }
+    function hideMenu() {
+      if (menuEl && menuEl.parentNode) menuEl.parentNode.removeChild(menuEl);
+      menuEl = null;
+    }
+    function onDocClick(e: MouseEvent) {
+      if (!menuEl) return;
+      const path = (e.composedPath?.() as any) || [];
+      if (!path.includes(menuEl) && !path.includes(btn)) hideMenu();
+    }
   };
   // @ts-ignore Zotero Reader API
   Zotero.Reader.registerEventListener(type, handler, pkg.config.addonID);
@@ -139,4 +190,120 @@ function injectIntoSubFrames(doc: Document, fn: (doc: Document) => void) {
       // 跨域 frame 跳过
     }
   }
+}
+
+function positionMenuUnderButton(btn: HTMLElement, menu: HTMLDivElement) {
+  const rect = btn.getBoundingClientRect();
+  Object.assign(menu.style, {
+    position: "fixed",
+    top: `${Math.round(rect.bottom + 4)}px`,
+    left: `${Math.round(rect.left)}px`,
+    zIndex: "99999",
+  } as Partial<CSSStyleDeclaration>);
+}
+
+function buildMenu(doc: Document, keys: ThemeKey[], onPick: (k: ThemeKey) => void) {
+  const menu = doc.createElement("div");
+  menu.setAttribute("role", "menu");
+  Object.assign(menu.style, {
+    background: "Canvas",
+    color: "CanvasText",
+    border: "1px solid ButtonBorder",
+    borderRadius: "6px",
+    boxShadow: "0 4px 16px rgba(0,0,0,.15)",
+    padding: "6px 0",
+    minWidth: "180px",
+    fontSize: "12.5px",
+  } as Partial<CSSStyleDeclaration>);
+  (menu.style as any).colorScheme = "light dark";
+
+  for (const key of keys) {
+    const item = doc.createElement("div");
+    item.setAttribute("role", "menuitem");
+    Object.assign(item.style, {
+      display: "flex",
+      alignItems: "center",
+      gap: "8px",
+      padding: "6px 10px",
+      cursor: "pointer",
+    } as Partial<CSSStyleDeclaration>);
+
+    const dot = doc.createElement("span");
+    Object.assign(dot.style, {
+      position: "relative",
+      width: "16px",
+      height: "16px",
+      borderRadius: "50%",
+      background: PRESETS[key]["ts-bg"],
+      border: `1px solid ${PRESETS[key]["ts-border"] || "ButtonBorder"}`,
+      display: "inline-block",
+      boxSizing: "border-box",
+    } as Partial<CSSStyleDeclaration>);
+    const fg = doc.createElement("span");
+    Object.assign(fg.style, {
+      position: "absolute",
+      right: "-2px",
+      bottom: "-2px",
+      width: "9px",
+      height: "9px",
+      borderRadius: "50%",
+      background: PRESETS[key]["ts-fg"],
+      border: "1px solid rgba(0,0,0,.2)",
+    } as Partial<CSSStyleDeclaration>);
+    dot.appendChild(fg);
+
+    const label = doc.createElement("span");
+    label.textContent = themeDisplayName(key);
+
+    item.appendChild(dot);
+    item.appendChild(label);
+    item.addEventListener("mouseenter", () => {
+      item.style.background = "Highlight";
+      item.style.color = "HighlightText";
+    });
+    item.addEventListener("mouseleave", () => {
+      item.style.background = "transparent";
+      item.style.color = "inherit";
+    });
+    item.addEventListener("click", () => onPick(key));
+    menu.appendChild(item);
+  }
+  return menu as HTMLDivElement;
+}
+
+function getLocale(): string {
+  try {
+    // Zotero 有 locale，退化到浏览器
+    // @ts-ignore
+    return (Zotero?.locale as string) || navigator.language || "en-US";
+  } catch {
+    return "en-US";
+  }
+}
+
+function t(id: string): string {
+  const loc = getLocale().toLowerCase();
+  const zh = loc.startsWith("zh");
+  const map: Record<string, { zh: string; en: string }> = {
+    "ts-tooltip": { zh: "切换阅读主题", en: "Switch reading theme" },
+  };
+  const m = map[id];
+  if (!m) return id;
+  return zh ? m.zh : m.en;
+}
+
+function themeDisplayName(key: ThemeKey): string {
+  const loc = getLocale().toLowerCase();
+  const zh = loc.startsWith("zh");
+  const names: Record<ThemeKey, { zh: string; en: string }> = {
+    light: { zh: "白天", en: "Light" },
+    "deep-night": { zh: "暗夜", en: "Deep Night" },
+    midnight: { zh: "黑夜", en: "Midnight" },
+    beige: { zh: "米色", en: "Beige" },
+    "green-dou": { zh: "豆沙绿", en: "Green (Dou)" },
+    lilac: { zh: "浅紫", en: "Lilac" },
+    "deep-beige": { zh: "深米色", en: "Deep Beige" },
+  };
+  const n = names[key];
+  return (zh ? n.zh : n.en) || String(key);
 }

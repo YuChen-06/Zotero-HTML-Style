@@ -3,4 +3,22 @@
 /* eslint-disable */
 // @ts-nocheck
 export type FluentMessageId =
-  | 'app-name';
+  | 'app-name'
+  | 'ts-pref-click-behavior'
+  | 'ts-pref-click-cycle'
+  | 'ts-pref-click-menu'
+  | 'ts-pref-default-theme'
+  | 'ts-pref-footnote'
+  | 'ts-pref-json-label'
+  | 'ts-pref-reset'
+  | 'ts-pref-save'
+  | 'ts-pref-show-toolbar'
+  | 'ts-pref-title'
+  | 'ts-theme-beige'
+  | 'ts-theme-deep-beige'
+  | 'ts-theme-deep-night'
+  | 'ts-theme-green-dou'
+  | 'ts-theme-light'
+  | 'ts-theme-lilac'
+  | 'ts-theme-midnight'
+  | 'ts-tooltip';

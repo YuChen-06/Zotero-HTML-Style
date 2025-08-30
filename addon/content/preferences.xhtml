@@ -2,29 +2,44 @@
   <html:link rel="localization" href="__addonRef__-preferences.ftl" />
 </linkset>
 <groupbox onload="Zotero.__addonInstance__.hooks.onPrefsEvent('load', { window });">
-  <label><html:h2>Theme Switcher</html:h2></label>
+  <label><html:h2 data-l10n-id="ts-pref-title"></html:h2></label>
   <hbox align="center">
-    <html:label for="ts-default-theme" style="min-width: 140px;">默认主题</html:label>
+    <html:label for="ts-default-theme" style="min-width: 140px;" data-l10n-id="ts-pref-default-theme"></html:label>
     <menulist id="ts-default-theme" style="min-width: 200px;">
       <menupopup>
-        <menuitem value="light" label="light" />
-        <menuitem value="dark" label="dark" />
-        <menuitem value="eye-yellow" label="eye-yellow" />
-        <menuitem value="eye-green" label="eye-green" />
+        <menuitem value="light" data-l10n-id="ts-theme-light" />
+        <menuitem value="deep-night" data-l10n-id="ts-theme-deep-night" />
+        <menuitem value="midnight" data-l10n-id="ts-theme-midnight" />
+        <menuitem value="beige" data-l10n-id="ts-theme-beige" />
+        <menuitem value="green-dou" data-l10n-id="ts-theme-green-dou" />
+        <menuitem value="lilac" data-l10n-id="ts-theme-lilac" />
+        <menuitem value="deep-beige" data-l10n-id="ts-theme-deep-beige" />
       </menupopup>
     </menulist>
   </hbox>
+  <hbox align="center" style="margin-top: 8px;">
+    <html:label for="ts-click-behavior" style="min-width: 140px;" data-l10n-id="ts-pref-click-behavior"></html:label>
+    <menulist id="ts-click-behavior" style="min-width: 200px;">
+      <menupopup>
+        <menuitem value="menu" data-l10n-id="ts-pref-click-menu" />
+        <menuitem value="cycle" data-l10n-id="ts-pref-click-cycle" />
+      </menupopup>
+    </menulist>
+  </hbox>
+  <hbox align="center" style="margin-top: 8px;">
+    <checkbox id="ts-show-toolbar" data-l10n-id="ts-pref-show-toolbar" checked="true" />
+  </hbox>
   <separator />
   <vbox>
-    <html:label for="ts-json">自定义 CSS 变量（JSON，键名不含前缀 --）</html:label>
+    <html:label for="ts-json" data-l10n-id="ts-pref-json-label"></html:label>
     <html:textarea id="ts-json" rows="10" style="width: 100%;"></html:textarea>
     <hbox>
-      <button id="ts-json-save" label="保存" />
+      <button id="ts-json-save" data-l10n-id="ts-pref-save" />
       <spacer flex="1" />
-      <button id="ts-json-reset" label="恢复默认" />
+      <button id="ts-json-reset" data-l10n-id="ts-pref-reset" />
     </hbox>
   </vbox>
 </groupbox>
 <vbox>
-  <html:label>更改将在新打开的阅读器页签中生效；已打开的页签可点击工具栏按钮切换以刷新。</html:label>
+  <html:label data-l10n-id="ts-pref-footnote"></html:label>
 </vbox>

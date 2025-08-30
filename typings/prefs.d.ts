@@ -9,6 +9,8 @@ declare namespace _ZoteroTypes {
     PluginPrefsMap: {
       "defaultTheme": string;
       "customVariablesJSON": string;
+      "clickBehavior": string;
+      "showToolbar": boolean;
     };
   }
 }

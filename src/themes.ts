@@ -1,10 +1,20 @@
-export type ThemeKey = "light" | "dark" | "eye-yellow" | "eye-green";
+export type ThemeKey =
+  | "light"
+  | "deep-night"
+  | "midnight"
+  | "beige"
+  | "green-dou"
+  | "lilac"
+  | "deep-beige";
 
 export const THEME_ORDER: ThemeKey[] = [
   "light",
-  "dark",
-  "eye-yellow",
-  "eye-green",
+  "deep-night",
+  "midnight",
+  "beige",
+  "green-dou",
+  "lilac",
+  "deep-beige",
 ];
 
 export type VarMap = Record<string, string>;
@@ -20,45 +30,78 @@ export const PRESETS: Record<ThemeKey, VarMap> = {
     ...BASE_VARS,
     "ts-bg": "#ffffff",
     "ts-fg": "#111111",
-    "ts-link": "#0b57d0",
+    "ts-link": "LinkText",
     "ts-code-bg": "#f6f8fa",
     "ts-code-fg": "#0f172a",
     "ts-border": "#e5e7eb",
     "ts-muted": "#4b5563",
-    "ts-selection": "#e0f2fe",
+    "ts-selection": "Highlight",
   },
-  dark: {
+  "deep-night": {
     ...BASE_VARS,
-    "ts-bg": "#0b0f14",
-    "ts-fg": "#e5e7eb",
-    "ts-link": "#8ab4f8",
-    "ts-code-bg": "#111827",
-    "ts-code-fg": "#e5e7eb",
-    "ts-border": "#1f2937",
-    "ts-muted": "#9ca3af",
-    "ts-selection": "#1e3a8a",
+    "ts-bg": "#323542",
+    "ts-fg": "#c4cbe0",
+    "ts-link": "LinkText",
+    "ts-code-bg": "#2b2e3a",
+    "ts-code-fg": "#e6eaff",
+    "ts-border": "#3e4251",
+    "ts-muted": "#9aa2b4",
+    "ts-selection": "Highlight",
   },
-  "eye-yellow": {
+  midnight: {
     ...BASE_VARS,
-    "ts-bg": "#fff8dc", // cornsilk-like
-    "ts-fg": "#2b2b2b",
-    "ts-link": "#275d9d",
-    "ts-code-bg": "#fff2bf",
-    "ts-code-fg": "#1f2937",
-    "ts-border": "#e4d9a6",
-    "ts-muted": "#5b5b5b",
-    "ts-selection": "#fde68a",
+    "ts-bg": "#22262b",
+    "ts-fg": "#fcfcff",
+    "ts-link": "LinkText",
+    "ts-code-bg": "#1b1f24",
+    "ts-code-fg": "#e6eaf0",
+    "ts-border": "#2d3238",
+    "ts-muted": "#a9b1ba",
+    "ts-selection": "Highlight",
   },
-  "eye-green": {
+  beige: {
     ...BASE_VARS,
-    "ts-bg": "#f1f8e9",
-    "ts-fg": "#263238",
-    "ts-link": "#2b7a78",
-    "ts-code-bg": "#e6f4ea",
-    "ts-code-fg": "#1b4332",
-    "ts-border": "#c8e6c9",
-    "ts-muted": "#546e7a",
-    "ts-selection": "#b2dfdb",
+    "ts-bg": "#ede9e1",
+    "ts-fg": "#000000",
+    "ts-link": "LinkText",
+    "ts-code-bg": "#f2ede6",
+    "ts-code-fg": "#111111",
+    "ts-border": "#e0d9cd",
+    "ts-muted": "#4b5563",
+    "ts-selection": "Highlight",
+  },
+  "green-dou": {
+    ...BASE_VARS,
+    "ts-bg": "#c8edcc",
+    "ts-fg": "#000000",
+    "ts-link": "LinkText",
+    "ts-code-bg": "#d6f2d9",
+    "ts-code-fg": "#111111",
+    "ts-border": "#b8e2bd",
+    "ts-muted": "#374151",
+    "ts-selection": "Highlight",
+  },
+  lilac: {
+    ...BASE_VARS,
+    "ts-bg": "#dbe2f2",
+    "ts-fg": "#000000",
+    "ts-link": "LinkText",
+    "ts-code-bg": "#e6ebf8",
+    "ts-code-fg": "#111111",
+    "ts-border": "#cdd5ea",
+    "ts-muted": "#374151",
+    "ts-selection": "Highlight",
+  },
+  "deep-beige": {
+    ...BASE_VARS,
+    "ts-bg": "#e2eccd",
+    "ts-fg": "#000000",
+    "ts-link": "LinkText",
+    "ts-code-bg": "#e8f0d8",
+    "ts-code-fg": "#111111",
+    "ts-border": "#d3ddb9",
+    "ts-muted": "#374151",
+    "ts-selection": "Highlight",
   },
 };
 

@@ -5,6 +5,8 @@ export function bindPrefsPanel(win: Window) {
   const doc = win.document;
 
   const themeList = doc.getElementById("ts-default-theme") as any;
+  const clickBehaviorList = doc.getElementById("ts-click-behavior") as any;
+  const showToolbarCheckbox = doc.getElementById("ts-show-toolbar") as HTMLInputElement | null;
   const jsonArea = doc.getElementById("ts-json") as HTMLTextAreaElement | null;
   const btnSave = doc.getElementById("ts-json-save") as HTMLButtonElement | null;
   const btnReset = doc.getElementById("ts-json-reset") as HTMLButtonElement | null;
@@ -21,6 +23,35 @@ export function bindPrefsPanel(win: Window) {
         setPref("defaultTheme" as any, val);
       } catch (e) {
         alertIfPossible(win, `无法保存默认主题: ${e}`);
+      }
+    });
+  }
+
+  if (clickBehaviorList) {
+    const cur = (getPref("clickBehavior" as any) as string) || "menu";
+    try {
+      clickBehaviorList.value = cur;
+    } catch {}
+    clickBehaviorList.addEventListener("command", () => {
+      try {
+        const val = String(clickBehaviorList.value) as "menu" | "cycle";
+        setPref("clickBehavior" as any, val);
+      } catch (e) {
+        alertIfPossible(win, `无法保存按钮行为: ${e}`);
+      }
+    });
+  }
+
+  if (showToolbarCheckbox) {
+    const cur = (getPref("showToolbar" as any) as boolean);
+    try {
+      showToolbarCheckbox.checked = cur !== false; // 默认 true
+    } catch {}
+    showToolbarCheckbox.addEventListener("command", () => {
+      try {
+        setPref("showToolbar" as any, Boolean(showToolbarCheckbox.checked));
+      } catch (e) {
+        alertIfPossible(win, `无法保存工具栏开关: ${e}`);
       }
     });
   }

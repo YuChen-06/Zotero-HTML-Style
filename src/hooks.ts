@@ -16,6 +16,14 @@ async function onStartup() {
   if (!getPref("customVariablesJSON")) {
     setPref("customVariablesJSON" as any, "{}" as any);
   }
+  const cb = getPref("clickBehavior");
+  if (cb === undefined || cb === null || cb === "") {
+    setPref("clickBehavior" as any, "menu" as any);
+  }
+  const st = getPref("showToolbar");
+  if (st === undefined) {
+    setPref("showToolbar" as any, true as any);
+  }
 
   // 注册 Reader 事件与工具栏按钮
   registerReaderUI();
