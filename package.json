@@ -10,7 +10,10 @@
     "addonInstance": "ThemeSwitcher",
     "prefsPrefix": "extensions.zotero.theme-switcher"
   },
-  "repository": "https://github.com/YuChen-06/Zotero-Theme-Switcher",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YuChen-06/Zotero-Theme-Switcher.git"
+  },
   "author": "YuChen",
   "bugs": {
     "url": "https://github.com/YuChen-06/Zotero-Theme-Switcher/issues"
