@@ -1,4 +1,4 @@
-# Zotero-Theme-Switcher
+# Zotero-HTML-Style
 
 一个针对 Zotero 阅读器中“从 Zotero 打开的 HTML 页面”的主题扩展插件。项目定位为对「Style」类插件的功能扩充：提供内置多套配色主题（亮/暗/护眼黄/护眼绿），并允许通过自定义 CSS 变量实现更灵活的外观定制。
 
