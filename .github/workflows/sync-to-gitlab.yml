@@ -1,0 +1,27 @@
+name: Sync to GitLab
+on:
+  push:
+    branches:
+      - "**" 
+  delete:
+    branches:
+      - "**" 
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push to GitLab
+        env:
+          GITLAB_PAT: ${{ secrets.GITLAB_PAT }}
+        run: |
+          GITLAB_REPO_URL="https://oauth2:${GITLAB_PAT}@git.henau.edu.cn/Chen/zotero-theme-switcher.git"
+          
+          git push ${GITLAB_REPO_URL} --all -f
+          
+          git push ${GITLAB_REPO_URL} --tags -f
