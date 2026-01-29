@@ -6,11 +6,24 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "lib": ["es2019", "dom"],
-    "types": ["node"],
+    "lib": [
+      "es2019",
+      "dom",
+      "es2021.weakref"
+    ],
+    "types": [
+      "node"
+    ],
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true
   },
-  "include": ["src", "typings"],
-  "exclude": ["build", "addon", ".scaffold"]
+  "include": [
+    "src",
+    "typings"
+  ],
+  "exclude": [
+    "build",
+    "addon",
+    ".scaffold"
+  ]
 }

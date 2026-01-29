@@ -19,6 +19,7 @@ pnpm-debug.log*
 /.turbo/
 /.eslintcache
 /.tsbuildinfo
+*.tsbuildinfo
 
 # Packages
 *.xpi
@@ -48,3 +49,7 @@ dist/
 # Env files
 .env
 .env.*
+
+source_code_dump.txt
+docs/
+scripts/
