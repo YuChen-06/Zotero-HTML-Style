@@ -78,6 +78,7 @@ function ensureCore(): {
 }
 
 async function onStartup() {
+  Zotero.debug("Theme Switcher: startup begin");
   await Promise.all([
     Zotero.initializationPromise,
     Zotero.unlockPromise,
@@ -96,6 +97,7 @@ async function onStartup() {
   readerController.start();
 
   addon.data.initialized = true;
+  Zotero.debug("Theme Switcher: startup complete");
 }
 
 async function onMainWindowLoad(_win: Window): Promise<void> {
@@ -107,6 +109,7 @@ async function onMainWindowUnload(_win: Window): Promise<void> {
 }
 
 function onShutdown(): void {
+  Zotero.debug("Theme Switcher: shutdown begin");
   // 注意清理顺序：先停业务（ReaderController），再停配置（ConfigManager）
   try {
     (coreSnapshot?.readerController ?? readerControllerSingleton)?.dispose();
@@ -125,6 +128,7 @@ function onShutdown(): void {
   }
 
   coreSnapshot = null;
+  Zotero.debug("Theme Switcher: shutdown complete");
 }
 
 async function onNotify(

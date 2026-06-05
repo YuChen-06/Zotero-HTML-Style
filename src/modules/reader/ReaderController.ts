@@ -164,6 +164,7 @@ export class ReaderController implements Disposable {
    */
   private async handleRenderToolbar(event: RenderToolbarEvent): Promise<void> {
     const { reader, doc, append } = event;
+    this.log.debug("renderToolbar event received");
 
     // 记录 reader 以便后续热更新
     this.registry.register(reader);
@@ -256,6 +257,11 @@ export class ReaderController implements Disposable {
     theme: ThemeKey,
   ): Promise<void> {
     const doc = await this.readerAdapter.waitForHTMLDocument(reader);
+    if (!doc) {
+      this.log.debug("applyToReader: no HTML document found, skipping");
+      return;
+    }
+    this.log.debug(`applyToReader: applying theme "${theme}"`);
     if (!doc) return;
 
     const options = this.styleInjector.buildOptionsFromSettings(
