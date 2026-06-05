@@ -20,8 +20,15 @@
 import pkg from "../../../package.json";
 import { THEME_ORDER, PRESETS, type ThemeKey } from "../../themes";
 import type { ConfigManager } from "../config/ConfigManager";
-import type { ConfigChangeEvent, ThemeSwitcherSettings } from "../config/ConfigTypes";
-import { CompositeDisposable, FunctionDisposable, type Disposable } from "../utils/Disposable";
+import type {
+  ConfigChangeEvent,
+  ThemeSwitcherSettings,
+} from "../config/ConfigTypes";
+import {
+  CompositeDisposable,
+  FunctionDisposable,
+  type Disposable,
+} from "../utils/Disposable";
 import { Logger } from "../utils/Logger";
 import type { ThemeMenuItem } from "../ui/UIRenderer";
 import { UIRenderer } from "../ui/UIRenderer";
@@ -88,7 +95,10 @@ export class ReaderController implements Disposable {
    * - Reader 被关闭后应可被 GC 回收；
    * - WeakMap 不会形成强引用链，符合内存泄漏审计要求。
    */
-  private readonly currentThemeByReader = new WeakMap<ZoteroReaderInstance, ThemeKey>();
+  private readonly currentThemeByReader = new WeakMap<
+    ZoteroReaderInstance,
+    ThemeKey
+  >();
 
   /** Reader 事件 handler（需要保留引用以便卸载） */
   private readonly onRenderToolbar: ReaderEventHandler;
@@ -118,7 +128,11 @@ export class ReaderController implements Disposable {
 
     // 注册 Reader 工具栏渲染事件
     const api = this.getReaderAPI();
-    api.registerEventListener("renderToolbar", this.onRenderToolbar, pkg.config.addonID);
+    api.registerEventListener(
+      "renderToolbar",
+      this.onRenderToolbar,
+      pkg.config.addonID,
+    );
 
     // 卸载逻辑（若 API 支持）
     this.disposables.add(
@@ -126,7 +140,11 @@ export class ReaderController implements Disposable {
         const unregister = api.unregisterEventListener;
         if (typeof unregister === "function") {
           try {
-            unregister("renderToolbar", this.onRenderToolbar, pkg.config.addonID);
+            unregister(
+              "renderToolbar",
+              this.onRenderToolbar,
+              pkg.config.addonID,
+            );
           } catch {
             // best-effort
           }
@@ -175,7 +193,9 @@ export class ReaderController implements Disposable {
         void this.applyToReader(reader, latest, key);
       },
       onCycleTheme: () => {
-        const next = this.nextTheme(this.getOrInitThemeForReader(reader, settings));
+        const next = this.nextTheme(
+          this.getOrInitThemeForReader(reader, settings),
+        );
         this.setThemeForReader(reader, next);
         const latest = this.configManager.getSettings();
         void this.applyToReader(reader, latest, next);
@@ -200,11 +220,18 @@ export class ReaderController implements Disposable {
     // 合理的性能策略：只有相关 key 变化才触发热更新
     // （showToolbar 变化也会影响 UI，但其处理主要发生在下一次 renderToolbar；这里仍做样式刷新是安全的）
     const needRefresh = ev.changedKeys.some((k) =>
-      ["defaultTheme", "customVariablesJSON", "showToolbar", "clickBehavior"].includes(String(k)),
+      [
+        "defaultTheme",
+        "customVariablesJSON",
+        "showToolbar",
+        "clickBehavior",
+      ].includes(String(k)),
     );
     if (!needRefresh) return;
 
-    this.log.debug(`Config changed (${ev.changedKeys.join(", ")}), hot refreshing readers...`);
+    this.log.debug(
+      `Config changed (${ev.changedKeys.join(", ")}), hot refreshing readers...`,
+    );
 
     // 主动 compact 一次，减少 WeakRef 膨胀
     this.registry.compact();
@@ -248,7 +275,10 @@ export class ReaderController implements Disposable {
    * 2) 如果没有，则尝试读取 lastTheme（跨页签记忆）；
    * 3) 再退化到 defaultTheme。
    */
-  private getOrInitThemeForReader(reader: ZoteroReaderInstance, settings: ThemeSwitcherSettings): ThemeKey {
+  private getOrInitThemeForReader(
+    reader: ZoteroReaderInstance,
+    settings: ThemeSwitcherSettings,
+  ): ThemeKey {
     const mem = this.currentThemeByReader.get(reader);
     if (mem) return mem;
 
@@ -261,7 +291,10 @@ export class ReaderController implements Disposable {
   /**
    * 设置并持久化主题。
    */
-  private setThemeForReader(reader: ZoteroReaderInstance, theme: ThemeKey): void {
+  private setThemeForReader(
+    reader: ZoteroReaderInstance,
+    theme: ThemeKey,
+  ): void {
     this.currentThemeByReader.set(reader, theme);
     this.setLastTheme(theme);
   }

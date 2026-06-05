@@ -132,7 +132,9 @@ export class ReaderAdapter {
    *
    * @param reader Reader 实例
    */
-  public async waitForHTMLDocument(reader: ZoteroReaderInstance): Promise<Document | null> {
+  public async waitForHTMLDocument(
+    reader: ZoteroReaderInstance,
+  ): Promise<Document | null> {
     const startedAt = Date.now();
 
     // 先尝试一次快速路径

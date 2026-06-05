@@ -1,6 +1,10 @@
 import { ConfigManager } from "../modules/config/ConfigManager";
 import { getById, isAlreadyBound } from "../modules/utils/DomGuards";
-import { CompositeDisposable, FunctionDisposable, type Disposable } from "../modules/utils/Disposable";
+import {
+  CompositeDisposable,
+  FunctionDisposable,
+  type Disposable,
+} from "../modules/utils/Disposable";
 import { prettyJSON, safeParseJSON } from "../modules/utils/JsonUtils";
 import type { ThemeKey } from "../themes";
 
@@ -20,7 +24,7 @@ export function bindPrefsPanel(win: Window): Disposable {
   const doc = win.document;
 
   if (isAlreadyBound(doc, "prefs-panel")) {
-    return { dispose: () => { } };
+    return { dispose: () => {} };
   }
 
   const disposables = new CompositeDisposable();
@@ -47,7 +51,10 @@ export function bindPrefsPanel(win: Window): Disposable {
         const val = String(themeList.value ?? "light") as ThemeKey;
         configManager.setPref("defaultTheme", val);
       } catch (e) {
-        alertIfPossible(win, `无法保存默认主题: ${e instanceof Error ? e.message : String(e)}`);
+        alertIfPossible(
+          win,
+          `无法保存默认主题: ${e instanceof Error ? e.message : String(e)}`,
+        );
       }
     };
 
@@ -76,7 +83,10 @@ export function bindPrefsPanel(win: Window): Disposable {
         const val: "menu" | "cycle" = raw === "cycle" ? "cycle" : "menu";
         configManager.setPref("clickBehavior", val);
       } catch (e) {
-        alertIfPossible(win, `无法保存按钮行为: ${e instanceof Error ? e.message : String(e)}`);
+        alertIfPossible(
+          win,
+          `无法保存按钮行为: ${e instanceof Error ? e.message : String(e)}`,
+        );
       }
     };
 
@@ -84,7 +94,10 @@ export function bindPrefsPanel(win: Window): Disposable {
     disposables.add(
       new FunctionDisposable(() => {
         try {
-          clickBehaviorList.removeEventListener("command", onClickBehaviorChanged);
+          clickBehaviorList.removeEventListener(
+            "command",
+            onClickBehaviorChanged,
+          );
         } catch {
           // ignore
         }
@@ -101,9 +114,15 @@ export function bindPrefsPanel(win: Window): Disposable {
 
     const onShowToolbarChanged = () => {
       try {
-        configManager.setPref("showToolbar", Boolean(showToolbarCheckbox.checked));
+        configManager.setPref(
+          "showToolbar",
+          Boolean(showToolbarCheckbox.checked),
+        );
       } catch (e) {
-        alertIfPossible(win, `无法保存工具栏开关: ${e instanceof Error ? e.message : String(e)}`);
+        alertIfPossible(
+          win,
+          `无法保存工具栏开关: ${e instanceof Error ? e.message : String(e)}`,
+        );
       }
     };
 
@@ -111,7 +130,10 @@ export function bindPrefsPanel(win: Window): Disposable {
     disposables.add(
       new FunctionDisposable(() => {
         try {
-          showToolbarCheckbox.removeEventListener("command", onShowToolbarChanged);
+          showToolbarCheckbox.removeEventListener(
+            "command",
+            onShowToolbarChanged,
+          );
         } catch {
           // ignore
         }
@@ -121,7 +143,10 @@ export function bindPrefsPanel(win: Window): Disposable {
 
   if (jsonArea) {
     // 显示 raw JSON（而不是 settings.customVariables），这样可以保留用户原始书写习惯。
-    const raw = (configManager.getPref("customVariablesJSON") as unknown as string | undefined) ?? "{}";
+    const raw =
+      (configManager.getPref("customVariablesJSON") as unknown as
+        | string
+        | undefined) ?? "{}";
     jsonArea.value = safePrettyJSON(raw);
   }
 
@@ -140,7 +165,10 @@ export function bindPrefsPanel(win: Window): Disposable {
 
       const normalized = configManager.parseCustomVariables(txt);
       if (normalized.errors.length > 0) {
-        alertIfPossible(win, `JSON 校验失败：\n- ${normalized.errors.join("\n- ")}`);
+        alertIfPossible(
+          win,
+          `JSON 校验失败：\n- ${normalized.errors.join("\n- ")}`,
+        );
         return;
       }
 
@@ -148,9 +176,15 @@ export function bindPrefsPanel(win: Window): Disposable {
         // 保存用户输入的 JSON（而不是 normalize 后的 map），便于用户后续继续编辑。
         configManager.setPref("customVariablesJSON", txt);
         jsonArea.value = safePrettyJSON(txt);
-        alertIfPossible(win, "已保存。已打开的阅读器页签将实时热更新。\n（若个别页签未刷新，可能是 iframe 尚未就绪，将在下一次重试时生效。）");
+        alertIfPossible(
+          win,
+          "已保存。已打开的阅读器页签将实时热更新。\n（若个别页签未刷新，可能是 iframe 尚未就绪，将在下一次重试时生效。）",
+        );
       } catch (e) {
-        alertIfPossible(win, `保存失败: ${e instanceof Error ? e.message : String(e)}`);
+        alertIfPossible(
+          win,
+          `保存失败: ${e instanceof Error ? e.message : String(e)}`,
+        );
       }
     };
 
@@ -172,9 +206,15 @@ export function bindPrefsPanel(win: Window): Disposable {
         const txt = "{}";
         configManager.setPref("customVariablesJSON", txt);
         jsonArea.value = safePrettyJSON(txt);
-        alertIfPossible(win, "已恢复默认 JSON ({}). 已打开的阅读器页签将实时热更新。");
+        alertIfPossible(
+          win,
+          "已恢复默认 JSON ({}). 已打开的阅读器页签将实时热更新。",
+        );
       } catch (e) {
-        alertIfPossible(win, `恢复失败: ${e instanceof Error ? e.message : String(e)}`);
+        alertIfPossible(
+          win,
+          `恢复失败: ${e instanceof Error ? e.message : String(e)}`,
+        );
       }
     };
 
@@ -219,10 +259,13 @@ function safePrettyJSON(input: string): string {
 
 function resolveConfigManager(): ConfigManager {
   try {
-    const maybeGetter = (addon as unknown as { api?: { getThemeSwitcherCore?: () => unknown } })?.api
-      ?.getThemeSwitcherCore;
+    const maybeGetter = (
+      addon as unknown as { api?: { getThemeSwitcherCore?: () => unknown } }
+    )?.api?.getThemeSwitcherCore;
     if (typeof maybeGetter === "function") {
-      const core = maybeGetter() as unknown as { configManager?: ConfigManager };
+      const core = maybeGetter() as unknown as {
+        configManager?: ConfigManager;
+      };
       if (core?.configManager) return core.configManager;
     }
   } catch {

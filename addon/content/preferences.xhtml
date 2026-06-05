@@ -1,11 +1,17 @@
 <linkset>
   <html:link rel="localization" href="__addonRef__-preferences.ftl" />
 </linkset>
-<groupbox onload="Zotero.__addonInstance__.hooks.onPrefsEvent('load', { window });">
+<groupbox
+  onload="Zotero.__addonInstance__.hooks.onPrefsEvent('load', { window });"
+>
   <label><html:h2 data-l10n-id="ts-pref-title"></html:h2></label>
   <hbox align="center">
-    <html:label for="ts-default-theme" style="min-width: 140px;" data-l10n-id="ts-pref-default-theme"></html:label>
-    <menulist id="ts-default-theme" style="min-width: 200px;">
+    <html:label
+      for="ts-default-theme"
+      style="min-width: 140px"
+      data-l10n-id="ts-pref-default-theme"
+    ></html:label>
+    <menulist id="ts-default-theme" style="min-width: 200px">
       <menupopup>
         <menuitem value="light" data-l10n-id="ts-theme-light" />
         <menuitem value="deep-night" data-l10n-id="ts-theme-deep-night" />
@@ -17,22 +23,30 @@
       </menupopup>
     </menulist>
   </hbox>
-  <hbox align="center" style="margin-top: 8px;">
-    <html:label for="ts-click-behavior" style="min-width: 140px;" data-l10n-id="ts-pref-click-behavior"></html:label>
-    <menulist id="ts-click-behavior" style="min-width: 200px;">
+  <hbox align="center" style="margin-top: 8px">
+    <html:label
+      for="ts-click-behavior"
+      style="min-width: 140px"
+      data-l10n-id="ts-pref-click-behavior"
+    ></html:label>
+    <menulist id="ts-click-behavior" style="min-width: 200px">
       <menupopup>
         <menuitem value="menu" data-l10n-id="ts-pref-click-menu" />
         <menuitem value="cycle" data-l10n-id="ts-pref-click-cycle" />
       </menupopup>
     </menulist>
   </hbox>
-  <hbox align="center" style="margin-top: 8px;">
-    <checkbox id="ts-show-toolbar" data-l10n-id="ts-pref-show-toolbar" checked="true" />
+  <hbox align="center" style="margin-top: 8px">
+    <checkbox
+      id="ts-show-toolbar"
+      data-l10n-id="ts-pref-show-toolbar"
+      checked="true"
+    />
   </hbox>
   <separator />
   <vbox>
     <html:label for="ts-json" data-l10n-id="ts-pref-json-label"></html:label>
-    <html:textarea id="ts-json" rows="10" style="width: 100%;"></html:textarea>
+    <html:textarea id="ts-json" rows="10" style="width: 100%"></html:textarea>
     <hbox>
       <button id="ts-json-save" data-l10n-id="ts-pref-save" />
       <spacer flex="1" />

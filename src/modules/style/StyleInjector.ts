@@ -124,7 +124,9 @@ export class StyleInjector {
     try {
       visit(rootDoc);
     } catch (e) {
-      this.log.warn(`根文档注入失败: ${e instanceof Error ? e.message : String(e)}`);
+      this.log.warn(
+        `根文档注入失败: ${e instanceof Error ? e.message : String(e)}`,
+      );
     }
 
     // 决定是否递归处理子 iframe
@@ -180,7 +182,10 @@ export class StyleInjector {
    * @param doc 目标文档
    * @param vars CSS 变量映射（不含 `--`）
    */
-  private applyCustomVariables(doc: Document, vars: Record<string, string>): void {
+  private applyCustomVariables(
+    doc: Document,
+    vars: Record<string, string>,
+  ): void {
     const html = doc.documentElement as HTMLElement | null;
     if (!html) return;
 

@@ -77,7 +77,9 @@ export function prettyJSON(value: unknown, spaces = 2): string {
  * - 用户 JSON 可能传入数组、null、Date-like 等结构；
  * - 我们的 CSS 变量映射期望是简单的 `Record<string, unknown>`。
  */
-export function isPlainObject(value: unknown): value is Record<string, unknown> {
+export function isPlainObject(
+  value: unknown,
+): value is Record<string, unknown> {
   if (value === null || typeof value !== "object") return false;
   const proto = Object.getPrototypeOf(value);
   return proto === Object.prototype || proto === null;
@@ -117,15 +119,16 @@ export function isValidCSSVarKey(key: string): boolean {
  *   且当 value 是 object/array 时结果不可读。
  * - 这里统一把 value 转为 `String(value)`，并对键名做安全校验。
  */
-export function normalizeToStringMap(
-  value: unknown,
-): { vars: Record<string, string>; errors: string[] } {
+export function normalizeToStringMap(value: unknown): {
+  vars: Record<string, string>;
+  errors: string[];
+} {
   const errors: string[] = [];
 
   if (!isPlainObject(value)) {
     return {
       vars: {},
-      errors: ["JSON 必须是对象（Object），例如：{\"ts-bg\": \"#ffffff\"}"],
+      errors: ['JSON 必须是对象（Object），例如：{"ts-bg": "#ffffff"}'],
     };
   }
 

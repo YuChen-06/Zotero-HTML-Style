@@ -18,7 +18,11 @@
  */
 
 import type { ThemeKey } from "../../themes";
-import { CompositeDisposable, FunctionDisposable, type Disposable } from "../utils/Disposable";
+import {
+  CompositeDisposable,
+  FunctionDisposable,
+  type Disposable,
+} from "../utils/Disposable";
 import { Logger } from "../utils/Logger";
 
 /**
@@ -108,8 +112,12 @@ export class UIRenderer {
    * - TS 的 DOM lib 在不同版本中对 `colorScheme` 的声明不一致；
    * - 这里用“可选字段”扩展，避免引入 `any`。
    */
-  private static setColorScheme(style: CSSStyleDeclaration, value: string): void {
-    (style as CSSStyleDeclaration & { colorScheme?: string }).colorScheme = value;
+  private static setColorScheme(
+    style: CSSStyleDeclaration,
+    value: string,
+  ): void {
+    (style as CSSStyleDeclaration & { colorScheme?: string }).colorScheme =
+      value;
   }
 
   /**
@@ -220,7 +228,9 @@ export class UIRenderer {
         try {
           doc.addEventListener("mousedown", onDocClick, { once: true });
         } catch (e) {
-          this.log.warn(`绑定菜单关闭监听失败: ${e instanceof Error ? e.message : String(e)}`);
+          this.log.warn(
+            `绑定菜单关闭监听失败: ${e instanceof Error ? e.message : String(e)}`,
+          );
         }
       }, 0);
     };
@@ -350,7 +360,10 @@ export class UIRenderer {
    * - Reader 工具栏可能在不同容器内，使用 `position: fixed` 可以避免受父级定位上下文影响；
    * - 同时能确保滚动时菜单位置符合用户预期。
    */
-  private positionMenuUnderButton(btn: HTMLElement, menu: HTMLDivElement): void {
+  private positionMenuUnderButton(
+    btn: HTMLElement,
+    menu: HTMLDivElement,
+  ): void {
     const rect = btn.getBoundingClientRect();
     Object.assign(menu.style, {
       position: "fixed",

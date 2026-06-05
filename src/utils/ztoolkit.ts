@@ -1,4 +1,4 @@
-import { ZoteroToolkit, BasicTool, unregister, UITool } from "zotero-plugin-toolkit";
+import { ZoteroToolkit } from "zotero-plugin-toolkit";
 import pkg from "../../package.json";
 
 export { createZToolkit };
@@ -16,17 +16,4 @@ function initZToolkit(_ztoolkit: ReturnType<typeof createZToolkit>) {
   _ztoolkit.UI.basicOptions.ui.enableElementJSONLog = __env__ === "development";
   _ztoolkit.UI.basicOptions.ui.enableElementDOMLog = __env__ === "development";
   _ztoolkit.basicOptions.api.pluginID = pkg.config.addonID;
-}
-
-class MyToolkit extends BasicTool {
-  UI: UITool;
-
-  constructor() {
-    super();
-    this.UI = new UITool(this);
-  }
-
-  unregisterAll() {
-    unregister(this);
-  }
 }

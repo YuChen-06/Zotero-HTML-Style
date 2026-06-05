@@ -19,15 +19,17 @@
     "url": "https://github.com/YuChen-06/Zotero-Theme-Switcher/issues"
   },
   "homepage": "https://github.com/YuChen-06/Zotero-Theme-Switcher#readme",
-  "license": "AGPL-3.0-or-later",
+  "license": "Apache-2.0",
   "scripts": {
     "start": "zotero-plugin serve",
-    "build": "zotero-plugin build && tsc --noEmit",
+    "build": "cross-env NO_UPDATE_NOTIFIER=1 zotero-plugin build && tsc --noEmit",
     "lint:check": "prettier --check . && eslint .",
     "lint:fix": "prettier --write . && eslint . --fix",
     "release": "zotero-plugin release",
     "test": "zotero-plugin test",
-    "update-deps": "npm update --save"
+    "test:unit": "mocha",
+    "update-deps": "npm update --save",
+    "postinstall": "node patch-scaffold-notifier.mjs"
   },
   "dependencies": {
     "zotero-plugin-toolkit": "^5.1.0-beta.4"
@@ -38,9 +40,11 @@
     "@types/node": "^24.2.0",
     "@zotero-plugin/eslint-config": "^0.6.7",
     "chai": "^5.2.1",
+    "cross-env": "^10.1.0",
     "eslint": "^9.32.0",
     "mocha": "^11.7.1",
     "prettier": "^3.6.2",
+    "tsx": "^4.22.4",
     "typescript": "^5.9.2",
     "zotero-plugin-scaffold": "^0.7.0",
     "zotero-types": "^4.1.0-beta.1"

@@ -27,7 +27,11 @@ import type {
   ThemeSwitcherSettings,
 } from "./ConfigTypes";
 import { safeParseJSON, normalizeToStringMap } from "../utils/JsonUtils";
-import { CompositeDisposable, FunctionDisposable, type Disposable } from "../utils/Disposable";
+import {
+  CompositeDisposable,
+  FunctionDisposable,
+  type Disposable,
+} from "../utils/Disposable";
 import { Logger } from "../utils/Logger";
 import { PrefObserver } from "../utils/PrefObserver";
 import type { ThemeKey } from "../../themes";
@@ -135,7 +139,12 @@ export class ConfigManager implements Disposable {
 
     // 启动时广播一次 init 事件，便于上层立即渲染 UI/注入样式
     this.emit({
-      changedKeys: ["defaultTheme", "customVariablesJSON", "clickBehavior", "showToolbar"],
+      changedKeys: [
+        "defaultTheme",
+        "customVariablesJSON",
+        "clickBehavior",
+        "showToolbar",
+      ],
       settings: this.getSettings(),
       source: "init",
     });
@@ -168,7 +177,10 @@ export class ConfigManager implements Disposable {
   /**
    * 将 Pref 变化加入待处理队列，并在微任务中批量 flush。
    */
-  private enqueueChange(key: PluginPrefKey, source: ConfigChangeEvent["source"]): void {
+  private enqueueChange(
+    key: PluginPrefKey,
+    source: ConfigChangeEvent["source"],
+  ): void {
     this.pendingChangedKeys.add(key);
 
     if (this.flushScheduled) return;
@@ -194,7 +206,8 @@ export class ConfigManager implements Disposable {
   public getSettings(): ThemeSwitcherSettings {
     const defaultTheme = (this.getPref("defaultTheme") || "light") as ThemeKey;
 
-    const clickBehaviorRaw = (this.getPref("clickBehavior") || "menu") as string;
+    const clickBehaviorRaw = (this.getPref("clickBehavior") ||
+      "menu") as string;
     const clickBehavior: ClickBehavior =
       clickBehaviorRaw === "cycle" ? "cycle" : "menu";
 
@@ -217,9 +230,10 @@ export class ConfigManager implements Disposable {
    * @param raw JSON 字符串
    * @returns 规范化结果（含错误列表）
    */
-  public parseCustomVariables(
-    raw: string,
-  ): { vars: CustomCSSVariables; errors: string[] } {
+  public parseCustomVariables(raw: string): {
+    vars: CustomCSSVariables;
+    errors: string[];
+  } {
     const parsed = safeParseJSON<unknown>(raw, {});
     if (!parsed.ok) {
       return {
@@ -266,7 +280,9 @@ export class ConfigManager implements Disposable {
    * 向所有订阅者广播事件。
    */
   private emit(ev: ConfigChangeEvent): void {
-    this.log.debug(`配置变更: ${ev.changedKeys.join(", ")} (source=${ev.source})`);
+    this.log.debug(
+      `配置变更: ${ev.changedKeys.join(", ")} (source=${ev.source})`,
+    );
     for (const listener of Array.from(this.listeners)) {
       try {
         listener(ev);
@@ -284,7 +300,9 @@ export class ConfigManager implements Disposable {
    * - 本项目的 `global.d.ts` 将 `Zotero` 声明为 `any`，外部世界无法完全类型安全；
    * - 因此我们在模块边界处做一次断言，在模块内部保持严格类型。
    */
-  public getPref<K extends PluginPrefKey>(key: K): PluginPrefsMap[K] | undefined {
+  public getPref<K extends PluginPrefKey>(
+    key: K,
+  ): PluginPrefsMap[K] | undefined {
     const full = this.fullKey(key);
     const z = Zotero as unknown as {
       Prefs: {
@@ -299,7 +317,10 @@ export class ConfigManager implements Disposable {
   /**
    * 写入指定 pref 的值（强类型）。
    */
-  public setPref<K extends PluginPrefKey>(key: K, value: PluginPrefsMap[K]): void {
+  public setPref<K extends PluginPrefKey>(
+    key: K,
+    value: PluginPrefsMap[K],
+  ): void {
     const full = this.fullKey(key);
     const z = Zotero as unknown as {
       Prefs: {

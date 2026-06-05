@@ -1,0 +1,4 @@
+import:
+  - tsx
+spec: "tests/unit/**/*.test.ts"
+timeout: 5000

@@ -52,7 +52,10 @@ export class PrefObserver {
    * - 首选使用 Zotero 提供的高级 API（如果存在）。
    * - 如果不存在，则退化到 Firefox/XPCOM 的 `Services.prefs.addObserver`。
    */
-  public observePrefix(prefix: string, listener: PrefChangeListener): Disposable {
+  public observePrefix(
+    prefix: string,
+    listener: PrefChangeListener,
+  ): Disposable {
     const z = Zotero as unknown as {
       Prefs?: {
         registerObserver?: (
@@ -72,9 +75,7 @@ export class PrefObserver {
     const unregister = z?.Prefs?.unregisterObserver;
 
     if (typeof register === "function") {
-      this.log.debug(
-        `使用 Zotero.Prefs.registerObserver 监听前缀: ${prefix}`,
-      );
+      this.log.debug(`使用 Zotero.Prefs.registerObserver 监听前缀: ${prefix}`);
       register(prefix, listener, true);
 
       // 如果 Zotero 提供 unregisterObserver，则优先用它；否则以 best-effort 方式释放
@@ -97,19 +98,21 @@ export class PrefObserver {
     // ---------- 退化实现：Services.prefs ----------
     // 注意：该对象在 typings 中未必有完善声明，因此这里使用最小必要类型描述。
     type nsIObserver = {
-      observe: (
-        subject: unknown,
-        topic: string,
-        data: string | null,
-      ) => void;
+      observe: (subject: unknown, topic: string, data: string | null) => void;
     };
 
     type PrefService = {
-      addObserver: (domain: string, observer: nsIObserver, holdWeak: boolean) => void;
+      addObserver: (
+        domain: string,
+        observer: nsIObserver,
+        holdWeak: boolean,
+      ) => void;
       removeObserver: (domain: string, observer: nsIObserver) => void;
     };
 
-    const maybeServices = (globalThis as unknown as { Services?: { prefs?: PrefService } }).Services;
+    const maybeServices = (
+      globalThis as unknown as { Services?: { prefs?: PrefService } }
+    ).Services;
     const prefs = maybeServices?.prefs;
 
     if (!prefs || typeof prefs.addObserver !== "function") {

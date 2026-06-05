@@ -42,11 +42,16 @@ import type { ZoteroReaderInstance } from "./ReaderTypes";
 export class ReaderRegistry {
   private readonly log = Logger.create("ReaderRegistry");
 
-  private readonly dedupe = new WeakMap<ZoteroReaderInstance, WeakRef<ZoteroReaderInstance>>();
+  private readonly dedupe = new WeakMap<
+    ZoteroReaderInstance,
+    WeakRef<ZoteroReaderInstance>
+  >();
   private readonly refs = new Set<WeakRef<ZoteroReaderInstance>>();
 
   // 尽力使用 FinalizationRegistry，在 Reader 被回收时自动清理 WeakRef
-  private readonly finalizer: FinalizationRegistry<WeakRef<ZoteroReaderInstance>> | null;
+  private readonly finalizer: FinalizationRegistry<
+    WeakRef<ZoteroReaderInstance>
+  > | null;
 
   public constructor() {
     this.finalizer =
@@ -130,7 +135,9 @@ export class ReaderRegistry {
     }
 
     if (removed > 0) {
-      this.log.debug(`compact: removed=${removed}, weakRefCount=${this.refs.size}`);
+      this.log.debug(
+        `compact: removed=${removed}, weakRefCount=${this.refs.size}`,
+      );
     }
   }
 }
