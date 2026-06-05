@@ -158,7 +158,7 @@ export function bindPrefsPanel(win: Window): Disposable {
       if (!parsed.ok) {
         alertIfPossible(
           win,
-          `JSON 解析失败：${parsed.errorMessage || "未知错误"}\n\n示例：\n{\n  \"ts-bg\": \"#ffffff\",\n  \"ts-fg\": \"#000000\"\n}`,
+          `JSON 解析失败：${parsed.errorMessage || "未知错误"}\n\n示例：\n{\n  "ts-bg": "#ffffff",\n  "ts-fg": "#000000"\n}`,
         );
         return;
       }
