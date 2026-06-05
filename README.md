@@ -57,15 +57,15 @@
 
 ### 常用命令
 
-| 命令 | 说明 |
-|------|------|
-| `npm install` | 安装依赖 |
-| `npm run build` | 构建插件 + 类型检查 |
-| `npm run test:unit` | 运行单元测试 |
-| `npm run typecheck` | TypeScript 类型检查 |
-| `npm run lint:check` | 检查代码格式 |
-| `npm run lint:fix` | 自动修复格式 |
-| `npm run ci` | 完整 CI 流水线 |
+| 命令                 | 说明                |
+| -------------------- | ------------------- |
+| `npm install`        | 安装依赖            |
+| `npm run build`      | 构建插件 + 类型检查 |
+| `npm run test:unit`  | 运行单元测试        |
+| `npm run typecheck`  | TypeScript 类型检查 |
+| `npm run lint:check` | 检查代码格式        |
+| `npm run lint:fix`   | 自动修复格式        |
+| `npm run ci`         | 完整 CI 流水线      |
 
 ### 构建输出
 
@@ -83,6 +83,7 @@ npm run test:unit
 ### CI/CD
 
 项目使用 GitHub Actions 自动运行：
+
 - Lint 检查（Prettier + ESLint）
 - 单元测试
 - TypeScript 类型检查
@@ -167,13 +168,13 @@ Output: `.scaffold/build/zotero-theme-switcher.xpi`
 
 ## Development
 
-| Command | Description |
-|---------|-------------|
-| `npm run build` | Build plugin + type check |
-| `npm run test:unit` | Run unit tests |
-| `npm run typecheck` | TypeScript type check |
-| `npm run lint:check` | Check formatting |
-| `npm run ci` | Full CI pipeline |
+| Command              | Description               |
+| -------------------- | ------------------------- |
+| `npm run build`      | Build plugin + type check |
+| `npm run test:unit`  | Run unit tests            |
+| `npm run typecheck`  | TypeScript type check     |
+| `npm run lint:check` | Check formatting          |
+| `npm run ci`         | Full CI pipeline          |
 
 ## Compatibility
 
