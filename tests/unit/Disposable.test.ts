@@ -6,9 +6,9 @@ import {
   toDisposable,
 } from "../../src/modules/utils/Disposable.js";
 
-describe("Disposable", function() {
-  describe("FunctionDisposable", function() {
-    it("should call the function on dispose", function() {
+describe("Disposable", function () {
+  describe("FunctionDisposable", function () {
+    it("should call the function on dispose", function () {
       let called = false;
       const d = new FunctionDisposable(() => {
         called = true;
@@ -17,7 +17,7 @@ describe("Disposable", function() {
       expect(called).to.be.true;
     });
 
-    it("should be idempotent (second call is no-op)", function() {
+    it("should be idempotent (second call is no-op)", function () {
       let callCount = 0;
       const d = new FunctionDisposable(() => {
         callCount++;
@@ -28,15 +28,15 @@ describe("Disposable", function() {
     });
   });
 
-  describe("NoopDisposable", function() {
-    it("should not throw on dispose", function() {
+  describe("NoopDisposable", function () {
+    it("should not throw on dispose", function () {
       const d = new NoopDisposable();
       expect(() => d.dispose()).to.not.throw();
     });
   });
 
-  describe("CompositeDisposable", function() {
-    it("should dispose in LIFO order", function() {
+  describe("CompositeDisposable", function () {
+    it("should dispose in LIFO order", function () {
       const order: number[] = [];
       const composite = new CompositeDisposable();
       composite.add({ dispose: () => order.push(1) });
@@ -46,7 +46,7 @@ describe("Disposable", function() {
       expect(order).to.deep.equal([3, 2, 1]);
     });
 
-    it("should auto-dispose items added after dispose", function() {
+    it("should auto-dispose items added after dispose", function () {
       const composite = new CompositeDisposable();
       composite.dispose();
 
@@ -59,7 +59,7 @@ describe("Disposable", function() {
       expect(called).to.be.true;
     });
 
-    it("should be idempotent on dispose", function() {
+    it("should be idempotent on dispose", function () {
       let callCount = 0;
       const composite = new CompositeDisposable();
       composite.add({
@@ -73,8 +73,8 @@ describe("Disposable", function() {
     });
   });
 
-  describe("toDisposable", function() {
-    it("should return a FunctionDisposable", function() {
+  describe("toDisposable", function () {
+    it("should return a FunctionDisposable", function () {
       let called = false;
       const d = toDisposable(() => {
         called = true;
