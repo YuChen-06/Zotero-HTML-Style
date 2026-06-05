@@ -83,7 +83,8 @@ node scripts/generate_source_dump.js
 
 ## 兼容性
 
-- 适配 Zotero 7+（`manifest.json`: `strict_min_version: 7.0`, `strict_max_version: 8.*`）。
+- 适配 Zotero 7–9（`manifest.json`: `strict_min_version: 7.0`, `strict_max_version: 9.*`）。
+- 已在 Zotero 9.0.4 上测试通过。
 
 ## 许可证
 
@@ -94,7 +95,7 @@ node scripts/generate_source_dump.js
 <details>
 <summary>English</summary>
 
-# Zotero Theme Switcher (Zotero 7 Add-on)
+# Zotero Theme Switcher (Zotero 7–9 Add-on)
 
 A theme switcher add-on for **HTML pages opened inside Zotero Reader**.
 
