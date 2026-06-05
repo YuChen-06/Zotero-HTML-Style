@@ -48,6 +48,7 @@ jobs:
         run: npm ci
         env:
           CI: true
+          NO_UPDATE_NOTIFIER: 1
 
       - name: Lint check
         run: npm run lint:check
