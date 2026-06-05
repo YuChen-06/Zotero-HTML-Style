@@ -15,13 +15,13 @@ This also runs `postinstall` which patches the scaffold's update notifier to avo
 
 ## Commands
 
-| Command | Purpose | Exit Code |
-|---------|---------|-----------|
-| `npm run build` | Build plugin + type check | 0 |
-| `npm run test:unit` | Run unit tests (mocha) | 0 |
-| `npx tsc --noEmit` | TypeScript type check only | 0 |
-| `npm run lint:check` | Check formatting (prettier) + lint (eslint) | varies |
-| `npm run start` | Dev mode (zotero-plugin serve) | - |
+| Command              | Purpose                                     | Exit Code |
+| -------------------- | ------------------------------------------- | --------- |
+| `npm run build`      | Build plugin + type check                   | 0         |
+| `npm run test:unit`  | Run unit tests (mocha)                      | 0         |
+| `npx tsc --noEmit`   | TypeScript type check only                  | 0         |
+| `npm run lint:check` | Check formatting (prettier) + lint (eslint) | varies    |
+| `npm run start`      | Dev mode (zotero-plugin serve)              | -         |
 
 ## Build Output
 

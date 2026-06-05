@@ -98,12 +98,12 @@ async function onStartup() {
   addon.data.initialized = true;
 }
 
-async function onMainWindowLoad(win: Window): Promise<void> {
-  // 目前无需针对主窗口做额外处理
+async function onMainWindowLoad(_win: Window): Promise<void> {
+  // Reserved for future use
 }
 
-async function onMainWindowUnload(win: Window): Promise<void> {
-  // 释放 UI 资源（如后续注册了全局菜单/窗口资源，可在此卸载）
+async function onMainWindowUnload(_win: Window): Promise<void> {
+  // Reserved for future use
 }
 
 function onShutdown(): void {
@@ -128,12 +128,12 @@ function onShutdown(): void {
 }
 
 async function onNotify(
-  event: string,
-  type: string,
-  ids: Array<string | number>,
-  extraData: { [key: string]: any },
+  _event: string,
+  _type: string,
+  _ids: Array<string | number>,
+  _extraData: { [key: string]: any },
 ) {
-  // 暂无需要处理的通知
+  // Reserved for future use
 }
 
 async function onPrefsEvent(type: string, data: { [key: string]: any }) {
@@ -146,12 +146,12 @@ async function onPrefsEvent(type: string, data: { [key: string]: any }) {
   }
 }
 
-function onShortcuts(type: string) {
-  // 预留：快捷键支持（后续可加）
+function onShortcuts(_type: string) {
+  // Reserved for future use
 }
 
-function onDialogEvents(type: string) {
-  // 预留：对话框示例（不使用）
+function onDialogEvents(_type: string) {
+  // Reserved for future use
 }
 
 export default {

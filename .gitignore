@@ -8,6 +8,7 @@ node_modules/
 
 # Logs
 *.log
+logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -42,14 +43,9 @@ Thumbs.db
 .vscode/*
 !.vscode/settings.json
 
-# 构建输出文件夹
-build/
-dist/
-
 # Env files
 .env
 .env.*
 
 source_code_dump.txt
 docs/
-scripts/

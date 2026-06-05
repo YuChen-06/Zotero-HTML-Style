@@ -373,7 +373,6 @@ export class ReaderController implements Disposable {
    */
   private getLocale(): string {
     try {
-      // @ts-ignore
       return (Zotero?.locale as string) || navigator.language || "en-US";
     } catch {
       return "en-US";

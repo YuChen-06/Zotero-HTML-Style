@@ -1,3 +1,5 @@
+/* global console, process */
+
 /**
  * Post-install patch for zotero-plugin-scaffold.
  *
@@ -19,7 +21,7 @@ import { fileURLToPath } from "node:url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const scaffoldCliPath = resolve(
   __dirname,
-  "../node_modules/zotero-plugin-scaffold/dist/cli.mjs",
+  "node_modules/zotero-plugin-scaffold/dist/cli.mjs",
 );
 
 const SEARCH = `function updateNotifier(name, version) {
