@@ -1,2 +1,12 @@
 import zotero from "@zotero-plugin/eslint-config";
-export default zotero();
+import globals from "globals";
+
+export default [
+  ...zotero(),
+  {
+    files: ["**/*.mjs", "scripts/**/*.js"],
+    languageOptions: {
+      globals: globals.node,
+    },
+  },
+];

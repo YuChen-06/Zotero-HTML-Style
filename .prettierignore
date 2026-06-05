@@ -1,0 +1,31 @@
+# Build outputs
+.scaffold/
+build/
+dist/
+*.xpi
+
+# Dependencies
+node_modules/
+
+# Claude Code
+.claude/
+
+# Generated files
+source_code_dump.txt
+*.tsbuildinfo
+
+# Caches
+.cache/
+.parcel-cache/
+.turbo/
+.eslintcache
+
+# Coverage / temp
+coverage/
+tmp/
+temp/
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db

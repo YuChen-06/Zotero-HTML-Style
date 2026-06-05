@@ -1,4 +1,4 @@
-/* global console, process */
+/* eslint-env node */
 
 /**
  * Post-install patch for zotero-plugin-scaffold.

@@ -1,6 +1,9 @@
 # 依赖文件夹
 node_modules/
 
+# Claude Code worktrees and scratch
+.claude/
+
 # Build outputs
 /.scaffold/
 /build/
