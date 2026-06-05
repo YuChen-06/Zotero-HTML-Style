@@ -82,19 +82,19 @@ This document describes how to test the Zotero Theme Switcher plugin on Zotero 9
 
 ## Test Results Table
 
-| Test | Result | Notes |
-|------|--------|-------|
-| Zotero Version | | |
-| OS | | |
-| XPI Installed | | |
-| Plugin Enabled | | |
-| Theme Button Visible | | |
-| Theme Menu Works | | |
-| Theme Changes Apply | | |
-| Preferences Load | | |
-| Hot Reload Works | | |
-| Debug Output Clean | | |
-| Shutdown Clean | | |
+| Test                 | Result | Notes |
+| -------------------- | ------ | ----- |
+| Zotero Version       |        |       |
+| OS                   |        |       |
+| XPI Installed        |        |       |
+| Plugin Enabled       |        |       |
+| Theme Button Visible |        |       |
+| Theme Menu Works     |        |       |
+| Theme Changes Apply  |        |       |
+| Preferences Load     |        |       |
+| Hot Reload Works     |        |       |
+| Debug Output Clean   |        |       |
+| Shutdown Clean       |        |       |
 
 ## Troubleshooting
 
