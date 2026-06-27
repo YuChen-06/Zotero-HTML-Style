@@ -84,11 +84,6 @@ export class ConfigManager implements Disposable {
    */
   private readonly prefsPrefix: string = pkg.config.prefsPrefix;
 
-  /**
-   * 返回某个插件偏好项的完整 key。
-   *
-   * @param key 插件内部键名
-   */
   private fullKey<K extends PluginPrefKey>(key: K): string {
     return `${this.prefsPrefix}.${String(key)}`;
   }
@@ -228,12 +223,6 @@ export class ConfigManager implements Disposable {
     };
   }
 
-  /**
-   * 解析并校验用户自定义 CSS 变量 JSON。
-   *
-   * @param raw JSON 字符串
-   * @returns 规范化结果（含错误列表）
-   */
   public parseCustomVariables(raw: string): {
     vars: CustomCSSVariables;
     errors: string[];
@@ -263,14 +252,6 @@ export class ConfigManager implements Disposable {
     }
   }
 
-  /**
-   * 获取指定 pref 的值（强类型）。
-   *
-   * 为什么这里仍然需要类型断言：
-   * - Zotero 的 Pref API 在 sandbox typings 中通常不完整；
-   * - 本项目的 `global.d.ts` 将 `Zotero` 声明为 `any`，外部世界无法完全类型安全；
-   * - 因此我们在模块边界处做一次断言，在模块内部保持严格类型。
-   */
   public getPref<K extends PluginPrefKey>(
     key: K,
   ): PluginPrefsMap[K] | undefined {
@@ -285,9 +266,6 @@ export class ConfigManager implements Disposable {
     return v as PluginPrefsMap[K] | undefined;
   }
 
-  /**
-   * 写入指定 pref 的值（强类型）。
-   */
   public setPref<K extends PluginPrefKey>(
     key: K,
     value: PluginPrefsMap[K],

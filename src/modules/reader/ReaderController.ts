@@ -99,7 +99,6 @@ export class ReaderController implements Disposable {
     ThemeKey
   >();
 
-  /** Reader 事件 handler（需要保留引用以便卸载） */
   private readonly onRenderToolbar: ReaderEventHandler;
 
   public constructor(options: ReaderControllerOptions) {
@@ -207,9 +206,6 @@ export class ReaderController implements Disposable {
     await this.applyToReader(reader, settings, currentTheme);
   }
 
-  /**
-   * 当配置变化时触发热更新。
-   */
   private onConfigChanged(ev: ConfigChangeEvent): void {
     const settings = ev.settings;
 
@@ -239,13 +235,6 @@ export class ReaderController implements Disposable {
     });
   }
 
-  /**
-   * 对某个 Reader 重新应用样式。
-   *
-   * @param reader Reader 实例
-   * @param settings 最新配置
-   * @param theme 要应用的主题
-   */
   private async applyToReader(
     reader: ZoteroReaderInstance,
     settings: ThemeSwitcherSettings,
@@ -257,7 +246,6 @@ export class ReaderController implements Disposable {
       return;
     }
     this.log.debug(`applyToReader: applying theme "${theme}"`);
-    if (!doc) return;
 
     const options = this.styleInjector.buildOptionsFromSettings(
       settings,
@@ -289,9 +277,6 @@ export class ReaderController implements Disposable {
     return theme;
   }
 
-  /**
-   * 设置并持久化主题。
-   */
   private setThemeForReader(
     reader: ZoteroReaderInstance,
     theme: ThemeKey,
@@ -318,9 +303,6 @@ export class ReaderController implements Disposable {
     }
   }
 
-  /**
-   * 将“最近一次主题”写回 Zotero.Prefs。
-   */
   private setLastTheme(theme: ThemeKey): void {
     const full = `${pkg.config.prefsPrefix}.lastTheme`;
     try {
@@ -330,17 +312,11 @@ export class ReaderController implements Disposable {
     }
   }
 
-  /**
-   * 计算下一个主题（用于 cycle 行为）。
-   */
   private nextTheme(cur: ThemeKey): ThemeKey {
     const idx = THEME_ORDER.indexOf(cur);
     return THEME_ORDER[(idx + 1) % THEME_ORDER.length];
   }
 
-  /**
-   * 构建 UI 主题菜单项。
-   */
   private buildThemeMenuItems(): ThemeMenuItem[] {
     return THEME_ORDER.map((key) => {
       const preset = PRESETS[key];
@@ -369,9 +345,6 @@ export class ReaderController implements Disposable {
     return api;
   }
 
-  /**
-   * 获取当前 locale。
-   */
   private getLocale(): string {
     try {
       return (Zotero?.locale as string) || navigator.language || "en-US";
@@ -398,9 +371,6 @@ export class ReaderController implements Disposable {
     return zh ? m.zh : m.en;
   }
 
-  /**
-   * 主题显示名（用于菜单）。
-   */
   private themeDisplayName(key: ThemeKey): string {
     const loc = this.getLocale().toLowerCase();
     const zh = loc.startsWith("zh");
@@ -419,9 +389,6 @@ export class ReaderController implements Disposable {
     return (zh ? n.zh : n.en) || String(key);
   }
 
-  /**
-   * 释放控制器资源。
-   */
   public dispose(): void {
     this.disposables.dispose();
   }
