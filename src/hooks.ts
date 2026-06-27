@@ -7,7 +7,8 @@ let configManager: ConfigManager | null = null;
 let readerController: ReaderController | null = null;
 
 function ensureCore() {
-  if (configManager && readerController) return { configManager, readerController };
+  if (configManager && readerController)
+    return { configManager, readerController };
 
   // ponytail: try addon.api getter first (avoids circular import with index.ts).
   // Fallback to local construction — can't happen in practice since index.ts
@@ -68,8 +69,20 @@ async function onMainWindowUnload(_win: Window): Promise<void> {
 
 function onShutdown(): void {
   Zotero.debug("Theme Switcher: shutdown begin");
-  try { readerController?.dispose(); } catch { /* best-effort */ } finally { readerController = null; }
-  try { configManager?.dispose(); } catch { /* best-effort */ } finally { configManager = null; }
+  try {
+    readerController?.dispose();
+  } catch {
+    /* best-effort */
+  } finally {
+    readerController = null;
+  }
+  try {
+    configManager?.dispose();
+  } catch {
+    /* best-effort */
+  } finally {
+    configManager = null;
+  }
   Zotero.debug("Theme Switcher: shutdown complete");
 }
 

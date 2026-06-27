@@ -99,13 +99,21 @@ export class ReaderAdapter {
       let timeoutId: number | null = null;
 
       const cleanup = () => {
-        if (timerId !== null) { clearInterval(timerId); timerId = null; }
-        if (timeoutId !== null) { clearTimeout(timeoutId); timeoutId = null; }
+        if (timerId !== null) {
+          clearInterval(timerId);
+          timerId = null;
+        }
+        if (timeoutId !== null) {
+          clearTimeout(timeoutId);
+          timeoutId = null;
+        }
         try {
           const win = this.tryGetIframeWindow(reader);
           win?.removeEventListener("load", onMaybeReady);
           win?.document?.removeEventListener("DOMContentLoaded", onMaybeReady);
-        } catch { /* best-effort */ }
+        } catch {
+          /* best-effort */
+        }
       };
 
       const finish = (doc: Document | null) => {
@@ -131,14 +139,21 @@ export class ReaderAdapter {
           win.addEventListener("load", onMaybeReady);
           win.document?.addEventListener("DOMContentLoaded", onMaybeReady);
         }
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
 
       timerId = setInterval(() => {
         attempts += 1;
         const doc = this.tryGetHTMLDocument(reader);
-        if (doc) { finish(doc); return; }
+        if (doc) {
+          finish(doc);
+          return;
+        }
         if (attempts >= this.maxAttempts) {
-          this.log.warn(`Reader 文档获取失败（${attempts} attempts, ${Date.now() - startedAt}ms）`);
+          this.log.warn(
+            `Reader 文档获取失败（${attempts} attempts, ${Date.now() - startedAt}ms）`,
+          );
           finish(null);
         }
       }, this.retryIntervalMs) as unknown as number;

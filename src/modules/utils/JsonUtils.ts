@@ -18,7 +18,10 @@
  */
 
 /** Safe JSON parse — returns {ok, value, errorMessage} instead of throwing. */
-export function safeParseJSON<T>(raw: string, fallback: T): {
+export function safeParseJSON<T>(
+  raw: string,
+  fallback: T,
+): {
   ok: boolean;
   value: T;
   errorMessage?: string;

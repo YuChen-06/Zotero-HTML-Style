@@ -8,14 +8,18 @@ describe("Disposable", function () {
   describe("disposeFn", function () {
     it("should call the function on dispose", function () {
       let called = false;
-      const d = disposeFn(() => { called = true; });
+      const d = disposeFn(() => {
+        called = true;
+      });
       d.dispose();
       expect(called).to.be.true;
     });
 
     it("should be idempotent (second call is no-op)", function () {
       let callCount = 0;
-      const d = disposeFn(() => { callCount++; });
+      const d = disposeFn(() => {
+        callCount++;
+      });
       d.dispose();
       d.dispose();
       expect(callCount).to.equal(1);

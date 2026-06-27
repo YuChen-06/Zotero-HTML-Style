@@ -19,10 +19,7 @@
 
 import pkg from "../../../package.json";
 import { safeParseJSON, normalizeToStringMap } from "../utils/JsonUtils";
-import {
-  CompositeDisposable,
-  type Disposable,
-} from "../utils/Disposable";
+import { CompositeDisposable, type Disposable } from "../utils/Disposable";
 import { createLogger } from "../utils/Logger";
 import { observePrefPrefix } from "../utils/PrefObserver";
 import type { ThemeKey } from "../../themes";

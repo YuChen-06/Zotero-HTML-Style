@@ -45,7 +45,11 @@ export function observePrefPrefix(
 
   if (typeof z.Prefs.unregisterObserver === "function") {
     return disposeFn(() => {
-      try { z.Prefs.unregisterObserver!(prefix, listener, true); } catch { /* best-effort */ }
+      try {
+        z.Prefs.unregisterObserver!(prefix, listener, true);
+      } catch {
+        /* best-effort */
+      }
     });
   }
 

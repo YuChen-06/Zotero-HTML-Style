@@ -39,13 +39,19 @@ export class StyleInjector {
   private readonly styleElementId: string;
   private readonly defaultMaxFrameDepth: number;
 
-  public constructor(options?: { styleElementId?: string; defaultMaxFrameDepth?: number }) {
+  public constructor(options?: {
+    styleElementId?: string;
+    defaultMaxFrameDepth?: number;
+  }) {
     this.styleElementId = options?.styleElementId ?? "theme-switcher-style";
     this.defaultMaxFrameDepth = options?.defaultMaxFrameDepth ?? 5;
   }
 
   /** Apply theme + CSS variables to a document tree (optionally recursing into iframes). */
-  public applyToDocumentTree(rootDoc: Document, options: StyleApplyOptions): void {
+  public applyToDocumentTree(
+    rootDoc: Document,
+    options: StyleApplyOptions,
+  ): void {
     const visit = (doc: Document) => {
       if (!isHTMLDocument(doc)) return;
       this.ensureBaseStyleInjected(doc);
@@ -53,14 +59,27 @@ export class StyleInjector {
       this.applyTheme(doc, options.theme);
     };
 
-    try { visit(rootDoc); } catch (e) {
-      this.log.warn(`根文档注入失败: ${e instanceof Error ? e.message : String(e)}`);
+    try {
+      visit(rootDoc);
+    } catch (e) {
+      this.log.warn(
+        `根文档注入失败: ${e instanceof Error ? e.message : String(e)}`,
+      );
     }
 
     if (options.scope === "documentAndSubFrames") {
-      this.walkSubFrames(rootDoc, 0, Math.max(0, options.maxFrameDepth), (doc) => {
-        try { visit(doc); } catch { /* best-effort */ }
-      });
+      this.walkSubFrames(
+        rootDoc,
+        0,
+        Math.max(0, options.maxFrameDepth),
+        (doc) => {
+          try {
+            visit(doc);
+          } catch {
+            /* best-effort */
+          }
+        },
+      );
     }
   }
 
@@ -73,11 +92,18 @@ export class StyleInjector {
     return true;
   }
 
-  private applyCustomVariables(doc: Document, vars: Record<string, string>): void {
+  private applyCustomVariables(
+    doc: Document,
+    vars: Record<string, string>,
+  ): void {
     const html = doc.documentElement as HTMLElement | null;
     if (!html) return;
     for (const [k, v] of Object.entries(vars)) {
-      try { html.style.setProperty(`--${k}`, v); } catch { /* best-effort */ }
+      try {
+        html.style.setProperty(`--${k}`, v);
+      } catch {
+        /* best-effort */
+      }
     }
   }
 
@@ -89,11 +115,21 @@ export class StyleInjector {
   }
 
   /** Recursively visit accessible iframe documents. */
-  private walkSubFrames(doc: Document, depth: number, maxDepth: number, fn: (doc: Document) => void): void {
+  private walkSubFrames(
+    doc: Document,
+    depth: number,
+    maxDepth: number,
+    fn: (doc: Document) => void,
+  ): void {
     if (depth >= maxDepth) return;
     for (const iframe of Array.from(doc.querySelectorAll("iframe"))) {
       let childDoc: Document | null = null;
-      try { childDoc = (iframe as HTMLIFrameElement).contentWindow?.document ?? null; } catch { /* cross-origin */ }
+      try {
+        childDoc =
+          (iframe as HTMLIFrameElement).contentWindow?.document ?? null;
+      } catch {
+        /* cross-origin */
+      }
       if (!childDoc || !isHTMLDocument(childDoc)) continue;
       fn(childDoc);
       this.walkSubFrames(childDoc, depth + 1, maxDepth, fn);

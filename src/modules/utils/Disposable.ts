@@ -51,7 +51,11 @@ export class CompositeDisposable implements Disposable {
     if (this.disposed) return;
     this.disposed = true;
     for (let i = this.items.length - 1; i >= 0; i--) {
-      try { this.items[i].dispose(); } catch { /* best-effort */ }
+      try {
+        this.items[i].dispose();
+      } catch {
+        /* best-effort */
+      }
     }
     this.items.length = 0;
   }

@@ -45,8 +45,15 @@ export class ReaderRegistry {
   public forEachAlive(fn: (reader: ZoteroReaderInstance) => void): void {
     for (const ref of Array.from(this.refs)) {
       const reader = ref.deref();
-      if (!reader) { this.refs.delete(ref); continue; }
-      try { fn(reader); } catch { /* best-effort */ }
+      if (!reader) {
+        this.refs.delete(ref);
+        continue;
+      }
+      try {
+        fn(reader);
+      } catch {
+        /* best-effort */
+      }
     }
   }
 
@@ -54,7 +61,10 @@ export class ReaderRegistry {
   public compact(): void {
     let removed = 0;
     for (const ref of Array.from(this.refs)) {
-      if (!ref.deref()) { this.refs.delete(ref); removed++; }
+      if (!ref.deref()) {
+        this.refs.delete(ref);
+        removed++;
+      }
     }
     if (removed > 0) {
       this.log.debug(`compact: removed=${removed}, refs=${this.refs.size}`);

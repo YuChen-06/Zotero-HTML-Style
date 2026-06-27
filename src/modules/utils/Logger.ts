@@ -41,14 +41,29 @@ export function createLogger(moduleName: string): Logger {
       return;
     }
     const c: Partial<Console> = console;
-    const fn = level === "error" ? c.error : level === "warn" ? c.warn : level === "info" ? c.info : c.log;
+    const fn =
+      level === "error"
+        ? c.error
+        : level === "warn"
+          ? c.warn
+          : level === "info"
+            ? c.info
+            : c.log;
     if (typeof fn === "function") fn.call(console, msg);
   }
 
   return {
-    debug(message: string): void { if (isDev) print("debug", message); },
-    info(message: string): void { print("info", message); },
-    warn(message: string): void { print("warn", message); },
-    error(message: string): void { print("error", message); },
+    debug(message: string): void {
+      if (isDev) print("debug", message);
+    },
+    info(message: string): void {
+      print("info", message);
+    },
+    warn(message: string): void {
+      print("warn", message);
+    },
+    error(message: string): void {
+      print("error", message);
+    },
   };
 }
