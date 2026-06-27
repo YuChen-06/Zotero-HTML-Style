@@ -83,7 +83,11 @@ export class ReaderController implements Disposable {
     this.configManager.onChange = (ev) => this.onConfigChanged(ev);
 
     const api = this.getReaderAPI();
-    api.registerEventListener("renderToolbar", this.onRenderToolbar, pkg.config.addonID);
+    api.registerEventListener(
+      "renderToolbar",
+      this.onRenderToolbar,
+      pkg.config.addonID,
+    );
 
     this.disposables.add(
       disposeFn(() => {
@@ -148,11 +152,18 @@ export class ReaderController implements Disposable {
   private onConfigChanged(ev: ConfigChangeEvent): void {
     const settings = ev.settings;
     const needRefresh = ev.changedKeys.some((k) =>
-      ["defaultTheme", "customVariablesJSON", "showToolbar", "clickBehavior"].includes(String(k)),
+      [
+        "defaultTheme",
+        "customVariablesJSON",
+        "showToolbar",
+        "clickBehavior",
+      ].includes(String(k)),
     );
     if (!needRefresh) return;
 
-    this.log.debug(`Config changed (${ev.changedKeys.join(", ")}), hot refreshing...`);
+    this.log.debug(
+      `Config changed (${ev.changedKeys.join(", ")}), hot refreshing...`,
+    );
     this.registry.compact();
     this.registry.forEachAlive((reader) => {
       const theme = this.getOrInitThemeForReader(reader, settings);
