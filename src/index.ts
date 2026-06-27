@@ -36,9 +36,6 @@ export function getThemeSwitcherCore(): ThemeSwitcherCore {
 
 if (!zoteroGlobal[pkg.config.addonInstance]) {
   _globalThis.addon = new Addon();
-  defineGlobal("ztoolkit", () => {
-    return _globalThis.addon.data.ztoolkit;
-  });
   Zotero[pkg.config.addonInstance] = addon;
   (Zotero as any).__addonInstance__ = addon;
 }
@@ -53,14 +50,4 @@ try {
   }
 } catch {
   // ignore
-}
-
-function defineGlobal(name: Parameters<BasicTool["getGlobal"]>[0]): void;
-function defineGlobal(name: string, getter: () => any): void;
-function defineGlobal(name: string, getter?: () => any) {
-  Object.defineProperty(_globalThis, name, {
-    get() {
-      return getter ? getter() : basicTool.getGlobal(name);
-    },
-  });
 }

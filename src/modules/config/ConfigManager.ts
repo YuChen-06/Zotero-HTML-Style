@@ -149,12 +149,6 @@ export class ConfigManager implements Disposable {
     });
   }
 
-  /**
-   * 将完整 pref key 转为插件内部键名。
-   *
-   * @param fullPrefKey 完整 key
-   * @returns 插件内部键名（无法识别则返回 `null`）
-   */
   private toShortKey(fullPrefKey: string): PluginPrefKey | null {
     const prefix = `${this.prefsPrefix}.`;
     if (!fullPrefKey.startsWith(prefix)) return null;
