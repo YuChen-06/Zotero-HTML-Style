@@ -46,14 +46,11 @@ async function onStartup() {
 
   const { configManager, readerController } = ensureCore();
 
-  // 1) 初始化默认首选项（若未设置）
   configManager.initDefaults();
 
-  // 2) 启动 Pref 监听（用于热更新广播）
-  configManager.startObserve();
-
-  // 3) 启动 ReaderController（监听 renderToolbar 并注入 UI/样式）
+  // 设置 onChange 必须在 startObserve 之前，否则 init 事件会丢失
   readerController.start();
+  configManager.startObserve();
 
   addon.data.initialized = true;
   Zotero.debug("Theme Switcher: startup complete");
