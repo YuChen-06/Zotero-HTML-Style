@@ -30,13 +30,17 @@ export interface Logger {
 
 /** Create a prefixed logger for a module. Debug output is gated by __env__. */
 export function createLogger(moduleName: string): Logger {
-  const isDev = __env__ === "development";
+  // ponytail: __env__ is a build-time constant (esbuild define); default to production in tests
+  const isDev = typeof __env__ !== "undefined" && __env__ === "development";
   const prefix = `[${pkg.config.addonName}][${moduleName}]`;
 
   function print(level: LogLevel, message: string): void {
     const msg = `${prefix} ${message}`;
-    const z = Zotero as unknown as { debug?: (msg: string) => void };
-    if (typeof z?.debug === "function") {
+    const z =
+      typeof Zotero !== "undefined"
+        ? (Zotero as unknown as { debug?: (msg: string) => void })
+        : null;
+    if (z && typeof z.debug === "function") {
       z.debug(msg);
       return;
     }
