@@ -44,20 +44,7 @@ export interface ConfigChangeEvent {
   source: "init" | "prefs" | "manual";
 }
 
-/**
- * 配置管理器。
- *
- * 核心职责：
- * 1) 初始化默认偏好项，保证插件首次安装即可工作；
- * 2) 将 Pref 值读取为“强类型 + 已校验”的配置快照；
- * 3) 监听 Pref 变更并广播给上层（ReaderController），实现已打开 Reader 的实时热更新；
- * 4) 提供 `dispose()`，在插件 shutdown 时释放 observer，避免内存泄漏。
- *
- * 为什么要单独做 ConfigManager：
- * - Zotero 插件常见的反模式是：业务逻辑到处 `Zotero.Prefs.get/set`，
- *   导致 pref key 字符串散落、默认值不一致、校验缺失。
- * - 将其集中化后，上层只消费结构化的 `ThemeSwitcherSettings`，从而形成清晰分层。
- */
+/** Reads/writes plugin prefs, broadcasts config changes to ReaderController. */
 export class ConfigManager implements Disposable {
   private readonly log = createLogger("ConfigManager");
   private readonly disposables = new CompositeDisposable();
@@ -65,14 +52,7 @@ export class ConfigManager implements Disposable {
   // ponytail: single consumer (ReaderController), no need for Set-based pub/sub
   public onChange: ((ev: ConfigChangeEvent) => void) | null = null;
 
-  /**
-   * 用于合并同一轮（短时间）内的多次 Pref 变化。
-   *
-   * 为什么需要合并：
-   * - 在 Zotero 偏好面板中，“一次保存”可能会触发多个 pref 写入；
-   * - 如果每次写入都立即全量热刷新所有 Reader，会造成性能浪费与 UI 抖动。
-   * - 采用 microtask 级别的合并可以在不引入复杂依赖的情况下解决问题。
-   */
+  // Batch pref changes within a microtask to avoid redundant hot-refreshes
   private pendingChangedKeys = new Set<PluginPrefKey>();
   private flushScheduled = false;
 
@@ -85,13 +65,7 @@ export class ConfigManager implements Disposable {
     return `${this.prefsPrefix}.${String(key)}`;
   }
 
-  /**
-   * 初始化默认偏好项。
-   *
-   * 为什么必须做默认值：
-   * - Zotero 插件的 Pref 在首次安装时可能完全不存在；
-   * - 如果不初始化，业务侧可能读到 `undefined`，导致类型分支膨胀、或出现 UI 与逻辑不一致。
-   */
+  /** Set defaults for prefs that don't exist yet (first install). */
   public initDefaults(): void {
     const currentDefaultTheme = this.getPref("defaultTheme");
     if (!currentDefaultTheme) {
@@ -114,14 +88,7 @@ export class ConfigManager implements Disposable {
     }
   }
 
-  /**
-   * 启动对 Pref 变化的监听。
-   *
-   * 重要：
-   * - 该方法应在插件启动后调用一次。
-   * - 返回的 `Disposable`/或调用 `dispose()` 必须在 `onShutdown()` 中执行，
-   *   以防 observer 引用长期存在造成内存泄漏。
-   */
+  /** Start listening for pref changes. Call once after Zotero init. */
   public startObserve(): void {
     const prefix = `${this.prefsPrefix}.`;
 

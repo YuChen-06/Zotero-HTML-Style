@@ -42,37 +42,13 @@ import {
 } from "./ReaderAdapter";
 import { ReaderRegistry } from "./ReaderRegistry";
 
-/**
- * ReaderController 的构造参数。
- */
 export interface ReaderControllerOptions {
-  /** 配置管理器（负责 Pref 读取、监听与广播） */
   configManager: ConfigManager;
-
-  /** 样式注入器（负责注入与应用主题/CSS 变量） */
   styleInjector: StyleInjector;
-
-  /** 可选：自定义注入范围（默认对子 iframe 递归注入） */
   injectScope?: InjectScope;
 }
 
-/**
- * ReaderController：总控模块。
- *
- * 核心职责（对应你提出的“闭环要求”）：
- * - 注册 Zotero Reader 的 `renderToolbar` 事件，用于初始化每个 Reader 页签；
- * - 在工具栏渲染时：
- *   - 登记 Reader（用于后续热更新遍历）；
- *   - 渲染工具栏按钮与菜单（UIRenderer）；
- *   - 等待 iframe 文档就绪后注入/应用样式（ReaderAdapter + StyleInjector）。
- * - 订阅 ConfigManager 的配置变更事件：
- *   - 遍历 ReaderRegistry 中仍存活的 Reader；
- *   - 对每个 Reader 重新应用样式，实现“不重启即生效”。
- * - 实现 `dispose()`：
- *   - 注销 Reader 事件监听（若 API 支持）；
- *   - 取消配置订阅；
- *   - 清理内部资源引用，避免内存泄漏。
- */
+/** Registers renderToolbar, renders UI, injects styles, hot-refreshes on config change. */
 export class ReaderController implements Disposable {
   private readonly log = createLogger("ReaderController");
 
@@ -86,14 +62,6 @@ export class ReaderController implements Disposable {
 
   private readonly injectScope: InjectScope;
 
-  /**
-   * 记录每个 Reader 当前主题。
-   *
-   * 为什么使用 WeakMap：
-   * - key 为 Reader 实例；
-   * - Reader 被关闭后应可被 GC 回收；
-   * - WeakMap 不会形成强引用链，符合内存泄漏审计要求。
-   */
   private readonly currentThemeByReader = new WeakMap<
     ZoteroReaderInstance,
     ThemeKey
@@ -111,12 +79,6 @@ export class ReaderController implements Disposable {
     };
   }
 
-  /**
-   * 启动控制器：注册事件与订阅配置变化。
-   *
-   * 调用时机建议：
-   * - 在 `hooks.onStartup()` 完成 Zotero 初始化等待后调用。
-   */
   public start(): void {
     this.configManager.onChange = (ev) => this.onConfigChanged(ev);
 
@@ -149,13 +111,6 @@ export class ReaderController implements Disposable {
     this.log.debug("ReaderController started");
   }
 
-  /**
-   * 处理 `renderToolbar` 事件。
-   *
-   * 为什么设计为 async：
-   * - `renderToolbar` 回调触发时，Reader iframe 内 document 未必就绪；
-   * - 我们需要等待文档就绪后再注入样式，因此必须走异步等待。
-   */
   private async handleRenderToolbar(event: RenderToolbarEvent): Promise<void> {
     const { reader, doc, append } = event;
     this.log.debug("renderToolbar event received");
@@ -197,10 +152,7 @@ export class ReaderController implements Disposable {
       },
     });
 
-    // 注意：这里不把 uiHandle 存入全局强引用集合，避免 Reader 关闭后无法回收。
-    // UI 的生命周期主要由工具栏 document 自身销毁来管理。
-    // 在第三步后续的更完善版本中，我们会在 ReaderRegistry 里建立 per-reader 的 disposable 容器（同样使用 WeakMap）。
-    void uiHandle;
+    void uiHandle; // ponytail: UI lifetime managed by toolbar document destruction
 
     // 初次渲染时确保注入
     await this.applyToReader(reader, settings, currentTheme);
@@ -255,14 +207,6 @@ export class ReaderController implements Disposable {
     });
   }
 
-  /**
-   * 从内存/偏好中获取当前主题。
-   *
-   * 规则：
-   * 1) 优先使用 WeakMap 中的当前主题（用户在该 Reader 内手动切换的结果）；
-   * 2) 如果没有，则尝试读取 lastTheme（跨页签记忆）；
-   * 3) 再退化到 defaultTheme。
-   */
   private getOrInitThemeForReader(
     reader: ZoteroReaderInstance,
     settings: ThemeSwitcherSettings,
@@ -284,13 +228,7 @@ export class ReaderController implements Disposable {
     this.setLastTheme(theme);
   }
 
-  /**
-   * 从 Zotero.Prefs 读取“最近一次主题”。
-   *
-   * 说明：
-   * - 该 pref 不属于 ConfigManager 的强类型 map（因为它是运行态状态），
-   *   但仍然属于插件前缀下的持久化数据。
-   */
+  // ponytail: lastTheme is runtime state, not in ConfigManager's typed map
   private getLastTheme(): ThemeKey | undefined {
     const full = `${pkg.config.prefsPrefix}.lastTheme`;
     try {
@@ -329,13 +267,6 @@ export class ReaderController implements Disposable {
     });
   }
 
-  /**
-   * 获取 Zotero Reader API。
-   *
-   * 为什么需要运行时断言：
-   * - 本项目的 `global.d.ts` 将 Zotero 声明为 `any`；
-   * - 类型系统无法保证 API 存在，因此需在运行时进行最小检查。
-   */
   private getReaderAPI(): ZoteroReaderAPI {
     const api = (Zotero as any).Reader as ZoteroReaderAPI | undefined;
     if (!api || typeof api.registerEventListener !== "function") {
@@ -352,13 +283,6 @@ export class ReaderController implements Disposable {
     }
   }
 
-  /**
-   * 简易 i18n：用于少量文案（tooltip）。
-   *
-   * 说明：
-   * - 你的仓库已有 Fluent 资源；后续如果你希望统一走 Fluent，
-   *   可以在这里替换为 `Zotero.ftl`/`Zotero.getString` 等机制。
-   */
   private t(id: string): string {
     const loc = this.getLocale().toLowerCase();
     const zh = loc.startsWith("zh");
