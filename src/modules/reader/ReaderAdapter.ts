@@ -18,8 +18,36 @@
  */
 
 import { isHTMLDocument } from "../utils/DomGuards";
-import { Logger } from "../utils/Logger";
-import type { ZoteroReaderInstance } from "./ReaderTypes";
+import { createLogger } from "../utils/Logger";
+
+// --- Types (previously ReaderTypes.ts) ---
+
+export type ReaderEventType = "renderToolbar";
+
+export interface ZoteroReaderInstance {
+  _iframeWindow?: Window;
+}
+
+export interface RenderToolbarEvent {
+  reader: ZoteroReaderInstance;
+  doc: Document;
+  append: (el: HTMLElement) => void;
+}
+
+export type ReaderEventHandler = (event: RenderToolbarEvent) => void;
+
+export interface ZoteroReaderAPI {
+  registerEventListener: (
+    type: ReaderEventType,
+    handler: ReaderEventHandler,
+    pluginID: string,
+  ) => void;
+  unregisterEventListener?: (
+    type: ReaderEventType,
+    handler: ReaderEventHandler,
+    pluginID: string,
+  ) => void;
+}
 
 /**
  * ReaderAdapter 的行为参数。
@@ -63,7 +91,7 @@ export interface ReaderAdapterOptions {
  * - 将“私有字段访问的不稳定性”集中在一个模块内，避免污染业务逻辑。
  */
 export class ReaderAdapter {
-  private readonly log = Logger.create("ReaderAdapter");
+  private readonly log = createLogger("ReaderAdapter");
   private readonly options: ReaderAdapterOptions;
 
   public constructor(options?: Partial<ReaderAdapterOptions>) {

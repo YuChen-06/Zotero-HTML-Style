@@ -2,7 +2,7 @@ import { ConfigManager } from "../modules/config/ConfigManager";
 import { getById, isAlreadyBound } from "../modules/utils/DomGuards";
 import {
   CompositeDisposable,
-  FunctionDisposable,
+  disposeFn,
   type Disposable,
 } from "../modules/utils/Disposable";
 import { prettyJSON, safeParseJSON } from "../modules/utils/JsonUtils";
@@ -60,7 +60,7 @@ export function bindPrefsPanel(win: Window): Disposable {
 
     themeList.addEventListener("command", onThemeChanged);
     disposables.add(
-      new FunctionDisposable(() => {
+      disposeFn(() => {
         try {
           themeList.removeEventListener("command", onThemeChanged);
         } catch {
@@ -92,7 +92,7 @@ export function bindPrefsPanel(win: Window): Disposable {
 
     clickBehaviorList.addEventListener("command", onClickBehaviorChanged);
     disposables.add(
-      new FunctionDisposable(() => {
+      disposeFn(() => {
         try {
           clickBehaviorList.removeEventListener(
             "command",
@@ -128,7 +128,7 @@ export function bindPrefsPanel(win: Window): Disposable {
 
     showToolbarCheckbox.addEventListener("command", onShowToolbarChanged);
     disposables.add(
-      new FunctionDisposable(() => {
+      disposeFn(() => {
         try {
           showToolbarCheckbox.removeEventListener(
             "command",
@@ -190,7 +190,7 @@ export function bindPrefsPanel(win: Window): Disposable {
 
     btnSave.addEventListener("command", onSave);
     disposables.add(
-      new FunctionDisposable(() => {
+      disposeFn(() => {
         try {
           btnSave.removeEventListener("command", onSave);
         } catch {
@@ -220,7 +220,7 @@ export function bindPrefsPanel(win: Window): Disposable {
 
     btnReset.addEventListener("command", onReset);
     disposables.add(
-      new FunctionDisposable(() => {
+      disposeFn(() => {
         try {
           btnReset.removeEventListener("command", onReset);
         } catch {
@@ -235,7 +235,7 @@ export function bindPrefsPanel(win: Window): Disposable {
   };
   win.addEventListener("unload", onUnload, { once: true });
   disposables.add(
-    new FunctionDisposable(() => {
+    disposeFn(() => {
       try {
         win.removeEventListener("unload", onUnload);
       } catch {

@@ -3,78 +3,36 @@ import { ConfigManager } from "./modules/config/ConfigManager";
 import { ReaderController } from "./modules/reader/ReaderController";
 import { StyleInjector } from "./modules/style/StyleInjector";
 
-/**
- * 插件核心单例（运行态）。
- *
- * 为什么需要单例：
- * - Zotero 的生命周期回调可能被多次触发（例如热重载/窗口重建），我们必须保证初始化幂等；
- * - ConfigManager/ReaderController 都持有监听器与资源句柄，重复创建会导致重复监听与潜在泄漏。
- */
-let configManagerSingleton: ConfigManager | null = null;
-let readerControllerSingleton: ReaderController | null = null;
+let configManager: ConfigManager | null = null;
+let readerController: ReaderController | null = null;
 
-type CoreLike = {
-  configManager: ConfigManager;
-  readerController: ReaderController;
-};
+function ensureCore() {
+  if (configManager && readerController) return { configManager, readerController };
 
-let coreSnapshot: CoreLike | null = null;
-
-/**
- * 获取（或创建）核心单例。
- *
- * 说明：
- * - 这里不在模块顶层直接 new，是为了避免 Zotero 尚未完成初始化就提前触发 Pref/Reader API。
- */
-function ensureCore(): {
-  configManager: ConfigManager;
-  readerController: ReaderController;
-} {
-  // 优先使用 index.ts 挂载到 addon.api 的 getter（避免 hooks.ts 直接 import index.ts 引发循环依赖）。
-  // - index.ts -> addon.ts -> hooks.ts
-  // - 若 hooks.ts import index.ts，会形成环。
+  // ponytail: try addon.api getter first (avoids circular import with index.ts).
+  // Fallback to local construction — can't happen in practice since index.ts
+  // always mounts the getter before hooks.run.
   try {
-    const maybeGetter = (
+    const core = (
       addon as unknown as { api?: { getThemeSwitcherCore?: () => unknown } }
-    )?.api?.getThemeSwitcherCore;
-    if (typeof maybeGetter === "function") {
-      const core = maybeGetter() as unknown as {
-        configManager?: ConfigManager;
-        readerController?: ReaderController;
-      };
-      if (core?.configManager && core?.readerController) {
-        coreSnapshot = {
-          configManager: core.configManager,
-          readerController: core.readerController,
-        };
-        configManagerSingleton = core.configManager;
-        readerControllerSingleton = core.readerController;
-        return coreSnapshot;
-      }
+    )?.api?.getThemeSwitcherCore?.() as
+      | { configManager?: ConfigManager; readerController?: ReaderController }
+      | undefined;
+    if (core?.configManager && core?.readerController) {
+      configManager = core.configManager;
+      readerController = core.readerController;
+      return { configManager, readerController };
     }
   } catch {
     // ignore
   }
 
-  if (configManagerSingleton && readerControllerSingleton) {
-    coreSnapshot = {
-      configManager: configManagerSingleton,
-      readerController: readerControllerSingleton,
-    };
-    return coreSnapshot;
-  }
-
-  const configManager = new ConfigManager();
-  const styleInjector = new StyleInjector();
-  const readerController = new ReaderController({
-    configManager,
-    styleInjector,
-  });
-
-  configManagerSingleton = configManager;
-  readerControllerSingleton = readerController;
-  coreSnapshot = { configManager, readerController };
-  return coreSnapshot;
+  const cm = new ConfigManager();
+  const si = new StyleInjector();
+  const rc = new ReaderController({ configManager: cm, styleInjector: si });
+  configManager = cm;
+  readerController = rc;
+  return { configManager: cm, readerController: rc };
 }
 
 async function onStartup() {
@@ -110,34 +68,9 @@ async function onMainWindowUnload(_win: Window): Promise<void> {
 
 function onShutdown(): void {
   Zotero.debug("Theme Switcher: shutdown begin");
-  // 注意清理顺序：先停业务（ReaderController），再停配置（ConfigManager）
-  try {
-    (coreSnapshot?.readerController ?? readerControllerSingleton)?.dispose();
-  } catch {
-    // best-effort
-  } finally {
-    readerControllerSingleton = null;
-  }
-
-  try {
-    (coreSnapshot?.configManager ?? configManagerSingleton)?.dispose();
-  } catch {
-    // best-effort
-  } finally {
-    configManagerSingleton = null;
-  }
-
-  coreSnapshot = null;
+  try { readerController?.dispose(); } catch { /* best-effort */ } finally { readerController = null; }
+  try { configManager?.dispose(); } catch { /* best-effort */ } finally { configManager = null; }
   Zotero.debug("Theme Switcher: shutdown complete");
-}
-
-async function onNotify(
-  _event: string,
-  _type: string,
-  _ids: Array<string | number>,
-  _extraData: { [key: string]: any },
-) {
-  // Reserved for future use
 }
 
 async function onPrefsEvent(type: string, data: { [key: string]: any }) {
@@ -150,21 +83,10 @@ async function onPrefsEvent(type: string, data: { [key: string]: any }) {
   }
 }
 
-function onShortcuts(_type: string) {
-  // Reserved for future use
-}
-
-function onDialogEvents(_type: string) {
-  // Reserved for future use
-}
-
 export default {
   onStartup,
   onMainWindowLoad,
   onMainWindowUnload,
   onShutdown,
-  onNotify,
   onPrefsEvent,
-  onShortcuts,
-  onDialogEvents,
 };

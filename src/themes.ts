@@ -105,10 +105,6 @@ export const PRESETS: Record<ThemeKey, VarMap> = {
   },
 };
 
-export function mergeVars(base: VarMap, override?: VarMap): VarMap {
-  return { ...base, ...(override || {}) };
-}
-
 export function buildCSS(presets: Record<ThemeKey, VarMap>): string {
   const themeBlocks = THEME_ORDER.map((key) => {
     const vars = presets[key];

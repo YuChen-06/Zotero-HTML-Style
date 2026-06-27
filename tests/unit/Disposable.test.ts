@@ -1,37 +1,24 @@
 import { expect } from "chai";
 import {
-  FunctionDisposable,
-  NoopDisposable,
+  disposeFn,
   CompositeDisposable,
-  toDisposable,
 } from "../../src/modules/utils/Disposable.js";
 
 describe("Disposable", function () {
-  describe("FunctionDisposable", function () {
+  describe("disposeFn", function () {
     it("should call the function on dispose", function () {
       let called = false;
-      const d = new FunctionDisposable(() => {
-        called = true;
-      });
+      const d = disposeFn(() => { called = true; });
       d.dispose();
       expect(called).to.be.true;
     });
 
     it("should be idempotent (second call is no-op)", function () {
       let callCount = 0;
-      const d = new FunctionDisposable(() => {
-        callCount++;
-      });
+      const d = disposeFn(() => { callCount++; });
       d.dispose();
       d.dispose();
       expect(callCount).to.equal(1);
-    });
-  });
-
-  describe("NoopDisposable", function () {
-    it("should not throw on dispose", function () {
-      const d = new NoopDisposable();
-      expect(() => d.dispose()).to.not.throw();
     });
   });
 
@@ -70,17 +57,6 @@ describe("Disposable", function () {
       composite.dispose();
       composite.dispose();
       expect(callCount).to.equal(1);
-    });
-  });
-
-  describe("toDisposable", function () {
-    it("should return a FunctionDisposable", function () {
-      let called = false;
-      const d = toDisposable(() => {
-        called = true;
-      });
-      d.dispose();
-      expect(called).to.be.true;
     });
   });
 });

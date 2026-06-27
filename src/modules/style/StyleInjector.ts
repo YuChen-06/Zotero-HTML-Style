@@ -19,14 +19,30 @@
 
 import { buildCSS, PRESETS, THEME_ORDER, type ThemeKey } from "../../themes";
 import { isHTMLDocument } from "../utils/DomGuards";
-import { Logger } from "../utils/Logger";
-import type { ThemeSwitcherSettings } from "../config/ConfigTypes";
-import type {
-  InjectScope,
-  StyleApplyOptions,
-  StyleApplyResult,
-  StyleInjectorOptions,
-} from "./StyleTypes";
+import { createLogger } from "../utils/Logger";
+import type { ThemeSwitcherSettings } from "../config/ConfigManager";
+
+// --- Types (previously StyleTypes.ts) ---
+
+export type InjectScope = "documentOnly" | "documentAndSubFrames";
+
+export interface StyleApplyOptions {
+  theme: ThemeKey;
+  customVariables: Record<string, string>;
+  scope: InjectScope;
+  maxFrameDepth: number;
+}
+
+export interface StyleApplyResult {
+  processedDocuments: number;
+  injectedStyleDocuments: number;
+  skippedDocuments: number;
+}
+
+export interface StyleInjectorOptions {
+  styleElementId: string;
+  defaultMaxFrameDepth: number;
+}
 
 /**
  * 样式注入器。
@@ -43,7 +59,7 @@ import type {
  * - 热更新实现的关键：当 Pref 变化时，只要再次调用 `applyToDocumentTree` 即可刷新所有已打开页面。
  */
 export class StyleInjector {
-  private readonly log = Logger.create("StyleInjector");
+  private readonly log = createLogger("StyleInjector");
 
   private readonly options: StyleInjectorOptions;
 

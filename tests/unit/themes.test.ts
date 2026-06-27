@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { PRESETS, THEME_ORDER, mergeVars, buildCSS } from "../../src/themes.js";
+import { PRESETS, THEME_ORDER, buildCSS } from "../../src/themes.js";
 
 const EXPECTED_THEME_KEYS = [
   "light",
@@ -52,28 +52,6 @@ describe("themes", function () {
       for (const key of EXPECTED_THEME_KEYS) {
         expect(THEME_ORDER).to.include(key);
       }
-    });
-  });
-
-  describe("mergeVars", function () {
-    it("should return base when no override", function () {
-      const base = { "ts-bg": "#fff" };
-      const result = mergeVars(base);
-      expect(result).to.deep.equal(base);
-    });
-
-    it("should merge base with override", function () {
-      const base = { "ts-bg": "#fff", "ts-fg": "#000" };
-      const override = { "ts-bg": "#000" };
-      const result = mergeVars(base, override);
-      expect(result["ts-bg"]).to.equal("#000");
-      expect(result["ts-fg"]).to.equal("#000");
-    });
-
-    it("should handle undefined override gracefully", function () {
-      const base = { "ts-bg": "#fff" };
-      const result = mergeVars(base, undefined);
-      expect(result).to.deep.equal(base);
     });
   });
 

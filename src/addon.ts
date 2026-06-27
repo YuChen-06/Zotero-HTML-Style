@@ -4,7 +4,6 @@ import { createZToolkit } from "./utils/ztoolkit";
 
 class Addon {
   public data: {
-    alive: boolean;
     config: typeof pkg.config;
     env: "development" | "production";
     initialized?: boolean;
@@ -15,7 +14,6 @@ class Addon {
 
   constructor() {
     this.data = {
-      alive: true,
       config: pkg.config,
       env: __env__,
       initialized: false,

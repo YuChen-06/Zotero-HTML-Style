@@ -17,8 +17,8 @@
  * along with Zotero Theme Switcher.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Logger } from "../utils/Logger";
-import type { ZoteroReaderInstance } from "./ReaderTypes";
+import { createLogger } from "../utils/Logger";
+import type { ZoteroReaderInstance } from "./ReaderAdapter";
 
 /**
  * ReaderRegistry：用于跟踪“曾经出现过/仍可能存活”的 Reader 实例集合。
@@ -40,7 +40,7 @@ import type { ZoteroReaderInstance } from "./ReaderTypes";
  * - 这里即便没有 FinalizationRegistry 也能工作（只是清理会延迟到下一次遍历）。
  */
 export class ReaderRegistry {
-  private readonly log = Logger.create("ReaderRegistry");
+  private readonly log = createLogger("ReaderRegistry");
 
   private readonly dedupe = new WeakMap<
     ZoteroReaderInstance,
@@ -48,36 +48,14 @@ export class ReaderRegistry {
   >();
   private readonly refs = new Set<WeakRef<ZoteroReaderInstance>>();
 
-  // 尽力使用 FinalizationRegistry，在 Reader 被回收时自动清理 WeakRef
-  private readonly finalizer: FinalizationRegistry<
-    WeakRef<ZoteroReaderInstance>
-  > | null;
+  // ponytail: FinalizationRegistry removed — compact() + forEachAlive cleanup suffice.
 
-  public constructor() {
-    this.finalizer =
-      typeof FinalizationRegistry === "function"
-        ? new FinalizationRegistry((ref) => {
-            // 注意：finalizer 回调中不能做复杂操作，做最小清理即可
-            this.refs.delete(ref);
-          })
-        : null;
-  }
-
-  /**
-   * 登记一个 Reader 实例。
-   *
-   * @param reader Reader 实例
-   */
   public register(reader: ZoteroReaderInstance): void {
     if (this.dedupe.has(reader)) return;
 
     const ref = new WeakRef(reader);
     this.dedupe.set(reader, ref);
     this.refs.add(ref);
-
-    // 注册 finalizer：当 reader 被 GC 后，自动清理对应 WeakRef
-    // token 直接使用 ref 对象本身，便于在回调中定位
-    this.finalizer?.register(reader, ref);
   }
 
   /**

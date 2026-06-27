@@ -19,29 +19,28 @@
 
 import pkg from "../../../package.json";
 import { THEME_ORDER, PRESETS, type ThemeKey } from "../../themes";
-import type { ConfigManager } from "../config/ConfigManager";
 import type {
+  ConfigManager,
   ConfigChangeEvent,
   ThemeSwitcherSettings,
-} from "../config/ConfigTypes";
+} from "../config/ConfigManager";
 import {
   CompositeDisposable,
-  FunctionDisposable,
+  disposeFn,
   type Disposable,
 } from "../utils/Disposable";
-import { Logger } from "../utils/Logger";
+import { createLogger } from "../utils/Logger";
 import type { ThemeMenuItem } from "../ui/UIRenderer";
 import { UIRenderer } from "../ui/UIRenderer";
-import type { StyleInjector } from "../style/StyleInjector";
-import type { InjectScope } from "../style/StyleTypes";
-import { ReaderAdapter } from "./ReaderAdapter";
+import type { StyleInjector, InjectScope } from "../style/StyleInjector";
+import {
+  ReaderAdapter,
+  type ReaderEventHandler,
+  type RenderToolbarEvent,
+  type ZoteroReaderAPI,
+  type ZoteroReaderInstance,
+} from "./ReaderAdapter";
 import { ReaderRegistry } from "./ReaderRegistry";
-import type {
-  ReaderEventHandler,
-  RenderToolbarEvent,
-  ZoteroReaderAPI,
-  ZoteroReaderInstance,
-} from "./ReaderTypes";
 
 /**
  * ReaderController 的构造参数。
@@ -75,7 +74,7 @@ export interface ReaderControllerOptions {
  *   - 清理内部资源引用，避免内存泄漏。
  */
 export class ReaderController implements Disposable {
-  private readonly log = Logger.create("ReaderController");
+  private readonly log = createLogger("ReaderController");
 
   private readonly disposables = new CompositeDisposable();
 
@@ -120,11 +119,7 @@ export class ReaderController implements Disposable {
    * - 在 `hooks.onStartup()` 完成 Zotero 初始化等待后调用。
    */
   public start(): void {
-    // 订阅配置变化：用于热更新
-    const d = this.configManager.subscribe((ev) => {
-      this.onConfigChanged(ev);
-    });
-    this.disposables.add(d);
+    this.configManager.onChange = (ev) => this.onConfigChanged(ev);
 
     // 注册 Reader 工具栏渲染事件
     const api = this.getReaderAPI();
@@ -136,7 +131,7 @@ export class ReaderController implements Disposable {
 
     // 卸载逻辑（若 API 支持）
     this.disposables.add(
-      new FunctionDisposable(() => {
+      disposeFn(() => {
         const unregister = api.unregisterEventListener;
         if (typeof unregister === "function") {
           try {

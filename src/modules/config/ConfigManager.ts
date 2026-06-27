@@ -18,23 +18,34 @@
  */
 
 import pkg from "../../../package.json";
-import type {
-  ClickBehavior,
-  ConfigChangeEvent,
-  CustomCSSVariables,
-  PluginPrefKey,
-  PluginPrefsMap,
-  ThemeSwitcherSettings,
-} from "./ConfigTypes";
 import { safeParseJSON, normalizeToStringMap } from "../utils/JsonUtils";
 import {
   CompositeDisposable,
-  FunctionDisposable,
   type Disposable,
 } from "../utils/Disposable";
-import { Logger } from "../utils/Logger";
-import { PrefObserver } from "../utils/PrefObserver";
+import { createLogger } from "../utils/Logger";
+import { observePrefPrefix } from "../utils/PrefObserver";
 import type { ThemeKey } from "../../themes";
+
+// --- Types (previously ConfigTypes.ts) ---
+
+export type PluginPrefsMap = _ZoteroTypes.Prefs["PluginPrefsMap"];
+export type PluginPrefKey = keyof PluginPrefsMap;
+export type ClickBehavior = "menu" | "cycle";
+export type CustomCSSVariables = Record<string, string>;
+
+export interface ThemeSwitcherSettings {
+  defaultTheme: ThemeKey;
+  clickBehavior: ClickBehavior;
+  showToolbar: boolean;
+  customVariables: CustomCSSVariables;
+}
+
+export interface ConfigChangeEvent {
+  changedKeys: PluginPrefKey[];
+  settings: ThemeSwitcherSettings;
+  source: "init" | "prefs" | "manual";
+}
 
 /**
  * 配置管理器。
@@ -51,18 +62,11 @@ import type { ThemeKey } from "../../themes";
  * - 将其集中化后，上层只消费结构化的 `ThemeSwitcherSettings`，从而形成清晰分层。
  */
 export class ConfigManager implements Disposable {
-  private readonly log = Logger.create("ConfigManager");
+  private readonly log = createLogger("ConfigManager");
   private readonly disposables = new CompositeDisposable();
-  private readonly prefObserver = new PrefObserver();
 
-  /**
-   * 配置变更监听器集合。
-   *
-   * 说明：
-   * - 这里使用 Set 是为了避免重复订阅；
-   * - 订阅方应在自身 dispose 时取消订阅，以避免闭包泄漏。
-   */
-  private readonly listeners = new Set<(ev: ConfigChangeEvent) => void>();
+  // ponytail: single consumer (ReaderController), no need for Set-based pub/sub
+  public onChange: ((ev: ConfigChangeEvent) => void) | null = null;
 
   /**
    * 用于合并同一轮（短时间）内的多次 Pref 变化。
@@ -129,7 +133,7 @@ export class ConfigManager implements Disposable {
   public startObserve(): void {
     const prefix = `${this.prefsPrefix}.`;
 
-    const d = this.prefObserver.observePrefix(prefix, (fullPrefKey) => {
+    const d = observePrefPrefix(prefix, (fullPrefKey) => {
       const short = this.toShortKey(fullPrefKey);
       if (!short) return;
       this.enqueueChange(short, "prefs");
@@ -248,47 +252,14 @@ export class ConfigManager implements Disposable {
     return normalizeToStringMap(parsed.value);
   }
 
-  /**
-   * 订阅配置变更。
-   *
-   * @param listener 监听器
-   * @returns `Disposable`，用于取消订阅
-   */
-  public subscribe(listener: (ev: ConfigChangeEvent) => void): Disposable {
-    this.listeners.add(listener);
-    return new FunctionDisposable(() => {
-      this.listeners.delete(listener);
-    });
-  }
-
-  /**
-   * 手动触发一次“配置已更新”事件。
-   *
-   * 典型用途：
-   * - 当某些设置不是来自 Pref（未来可能来自 UI 临时状态）时，
-   *   可以统一走 ConfigManager 的广播渠道。
-   */
-  public notifyManual(changedKeys: PluginPrefKey[]): void {
-    this.emit({
-      changedKeys,
-      settings: this.getSettings(),
-      source: "manual",
-    });
-  }
-
-  /**
-   * 向所有订阅者广播事件。
-   */
   private emit(ev: ConfigChangeEvent): void {
     this.log.debug(
       `配置变更: ${ev.changedKeys.join(", ")} (source=${ev.source})`,
     );
-    for (const listener of Array.from(this.listeners)) {
-      try {
-        listener(ev);
-      } catch {
-        // best-effort：单个监听器异常不应影响其他监听器
-      }
+    try {
+      this.onChange?.(ev);
+    } catch {
+      // best-effort
     }
   }
 
@@ -340,6 +311,6 @@ export class ConfigManager implements Disposable {
    */
   public dispose(): void {
     this.disposables.dispose();
-    this.listeners.clear();
+    this.onChange = null;
   }
 }

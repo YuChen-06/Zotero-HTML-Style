@@ -20,10 +20,10 @@
 import type { ThemeKey } from "../../themes";
 import {
   CompositeDisposable,
-  FunctionDisposable,
+  disposeFn,
   type Disposable,
 } from "../utils/Disposable";
-import { Logger } from "../utils/Logger";
+import { createLogger } from "../utils/Logger";
 
 /**
  * 主题菜单项数据结构。
@@ -100,25 +100,10 @@ export interface UIHandle extends Disposable {
  * - UI 只通过回调把“用户意图”回传给控制层。
  */
 export class UIRenderer {
-  private readonly log = Logger.create("UIRenderer");
+  private readonly log = createLogger("UIRenderer");
 
   /** 工具栏按钮固定 id，用于防重（幂等渲染） */
   private static readonly BUTTON_ID = "theme-switcher-button";
-
-  /**
-   * 兼容 `CSSStyleDeclaration.colorScheme` 的最小类型扩展。
-   *
-   * 为什么需要：
-   * - TS 的 DOM lib 在不同版本中对 `colorScheme` 的声明不一致；
-   * - 这里用“可选字段”扩展，避免引入 `any`。
-   */
-  private static setColorScheme(
-    style: CSSStyleDeclaration,
-    value: string,
-  ): void {
-    (style as CSSStyleDeclaration & { colorScheme?: string }).colorScheme =
-      value;
-  }
 
   /**
    * 渲染工具栏按钮，并绑定菜单交互。
@@ -164,7 +149,7 @@ export class UIRenderer {
     btn.style.border = "none";
     btn.style.padding = "0 4px";
     btn.style.cursor = "pointer";
-    UIRenderer.setColorScheme(btn.style, "light dark");
+    (btn.style as any).colorScheme = "light dark";
 
     append(btn);
 
@@ -198,7 +183,7 @@ export class UIRenderer {
     };
 
     // 通过 Disposable 统一确保菜单被移除，避免“菜单残留”
-    disposables.add(new FunctionDisposable(() => hideMenu()));
+    disposables.add(disposeFn(() => hideMenu()));
 
     const onDocClick = (e: MouseEvent) => {
       if (!menuEl) return;
@@ -250,7 +235,7 @@ export class UIRenderer {
 
     btn.addEventListener("click", onButtonClick);
     disposables.add(
-      new FunctionDisposable(() => {
+      disposeFn(() => {
         try {
           btn.removeEventListener("click", onButtonClick);
         } catch {
@@ -293,7 +278,7 @@ export class UIRenderer {
       minWidth: "180px",
       fontSize: "12.5px",
     } as Partial<CSSStyleDeclaration>);
-    UIRenderer.setColorScheme(menu.style, "light dark");
+    (menu.style as any).colorScheme = "light dark";
 
     for (const theme of themes) {
       const item = doc.createElement("div");

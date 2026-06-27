@@ -8,7 +8,7 @@ import { StyleInjector } from "./modules/style/StyleInjector";
 const basicTool = new BasicTool();
 const zoteroGlobal = basicTool.getGlobal("Zotero") as any;
 
-export interface ThemeSwitcherCore {
+interface ThemeSwitcherCore {
   configManager: ConfigManager;
   styleInjector: StyleInjector;
   readerController: ReaderController;
