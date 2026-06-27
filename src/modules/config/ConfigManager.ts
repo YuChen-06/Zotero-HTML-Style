@@ -41,7 +41,7 @@ export interface ThemeSwitcherSettings {
 export interface ConfigChangeEvent {
   changedKeys: PluginPrefKey[];
   settings: ThemeSwitcherSettings;
-  source: "init" | "prefs" | "manual";
+  source: "init" | "prefs";
 }
 
 /** Reads/writes plugin prefs, broadcasts config changes to ReaderController. */
