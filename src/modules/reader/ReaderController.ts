@@ -82,15 +82,9 @@ export class ReaderController implements Disposable {
   public start(): void {
     this.configManager.onChange = (ev) => this.onConfigChanged(ev);
 
-    // 注册 Reader 工具栏渲染事件
     const api = this.getReaderAPI();
-    api.registerEventListener(
-      "renderToolbar",
-      this.onRenderToolbar,
-      pkg.config.addonID,
-    );
+    api.registerEventListener("renderToolbar", this.onRenderToolbar, pkg.config.addonID);
 
-    // 卸载逻辑（若 API 支持）
     this.disposables.add(
       disposeFn(() => {
         const unregister = api.unregisterEventListener;
@@ -113,21 +107,14 @@ export class ReaderController implements Disposable {
 
   private async handleRenderToolbar(event: RenderToolbarEvent): Promise<void> {
     const { reader, doc, append } = event;
-    this.log.debug("renderToolbar event received");
-
-    // 记录 reader 以便后续热更新
     this.registry.register(reader);
 
     const settings = this.configManager.getSettings();
-
-    // 用户可关闭工具栏按钮显示
     if (settings.showToolbar === false) return;
 
     const currentTheme = this.getOrInitThemeForReader(reader, settings);
-
     const themes = this.buildThemeMenuItems();
 
-    // 渲染 UI（防重、并提供 dispose）
     const uiHandle = this.uiRenderer.render({
       doc,
       append,
@@ -160,27 +147,13 @@ export class ReaderController implements Disposable {
 
   private onConfigChanged(ev: ConfigChangeEvent): void {
     const settings = ev.settings;
-
-    // 合理的性能策略：只有相关 key 变化才触发热更新
-    // （showToolbar 变化也会影响 UI，但其处理主要发生在下一次 renderToolbar；这里仍做样式刷新是安全的）
     const needRefresh = ev.changedKeys.some((k) =>
-      [
-        "defaultTheme",
-        "customVariablesJSON",
-        "showToolbar",
-        "clickBehavior",
-      ].includes(String(k)),
+      ["defaultTheme", "customVariablesJSON", "showToolbar", "clickBehavior"].includes(String(k)),
     );
     if (!needRefresh) return;
 
-    this.log.debug(
-      `Config changed (${ev.changedKeys.join(", ")}), hot refreshing readers...`,
-    );
-
-    // 主动 compact 一次，减少 WeakRef 膨胀
+    this.log.debug(`Config changed (${ev.changedKeys.join(", ")}), hot refreshing...`);
     this.registry.compact();
-
-    // 遍历存活 reader，尽力刷新
     this.registry.forEachAlive((reader) => {
       const theme = this.getOrInitThemeForReader(reader, settings);
       void this.applyToReader(reader, settings, theme);

@@ -56,9 +56,6 @@ export class ConfigManager implements Disposable {
   private pendingChangedKeys = new Set<PluginPrefKey>();
   private flushScheduled = false;
 
-  /**
-   * 获取插件 pref 前缀（例如 `extensions.zotero.theme-switcher`）。
-   */
   private readonly prefsPrefix: string = pkg.config.prefsPrefix;
 
   private fullKey<K extends PluginPrefKey>(key: K): string {
@@ -131,9 +128,6 @@ export class ConfigManager implements Disposable {
     return null;
   }
 
-  /**
-   * 将 Pref 变化加入待处理队列，并在微任务中批量 flush。
-   */
   private enqueueChange(
     key: PluginPrefKey,
     source: ConfigChangeEvent["source"],
@@ -153,13 +147,7 @@ export class ConfigManager implements Disposable {
     });
   }
 
-  /**
-   * 读取并生成当前配置快照。
-   *
-   * 输出保证：
-   * - 永远返回完整结构（不会出现 `undefined`），便于上层逻辑保持纯粹；
-   * - `customVariables` 一定是经过 JSON 解析与 key 校验后的结果。
-   */
+  /** Returns a complete settings snapshot. customVariables is always parsed+validated. */
   public getSettings(): ThemeSwitcherSettings {
     const defaultTheme = (this.getPref("defaultTheme") || "light") as ThemeKey;
 
@@ -238,13 +226,6 @@ export class ConfigManager implements Disposable {
     z.Prefs.set(full, value as unknown, true);
   }
 
-  /**
-   * 释放资源。
-   *
-   * 必须在 `hooks.onShutdown()` 调用，原因：
-   * - Pref observer 会持有回调引用；
-   * - 回调闭包可能间接引用 ConfigManager/Controller，从而阻止 GC，导致内存泄漏。
-   */
   public dispose(): void {
     this.disposables.dispose();
     this.onChange = null;
