@@ -1,5 +1,5 @@
 import { ConfigManager } from "../modules/config/ConfigManager";
-import { getById, isAlreadyBound } from "../modules/utils/DomGuards";
+import { getById } from "../modules/utils/DomGuards";
 import {
   CompositeDisposable,
   disposeFn,
@@ -10,22 +10,14 @@ import type { ThemeKey } from "../themes";
 
 type ValueElement = HTMLElement & { value?: unknown };
 
-/**
- * 绑定偏好面板。
- *
- * 目标：
- * - 使用 ConfigManager 作为唯一配置读写入口（保证写入能触发 Pref 监听，从而驱动 Reader 热更新）。
- * - 做到可审计的资源清理：返回 Disposable，并在窗口 unload 时自动 dispose。
- * - 防重复绑定：Zotero 可能多次触发 prefs load，同一 document 不应重复 addEventListener。
- *
- * @param win 偏好面板窗口
- */
+/** Bind the preferences panel. Idempotent — safe to call multiple times. */
 export function bindPrefsPanel(win: Window): Disposable {
   const doc = win.document;
-
-  if (isAlreadyBound(doc, "prefs-panel")) {
+  const root = doc.documentElement;
+  if (root?.getAttribute("data-ts-bound-prefs") === "1") {
     return { dispose: () => {} };
   }
+  root?.setAttribute("data-ts-bound-prefs", "1");
 
   const disposables = new CompositeDisposable();
 

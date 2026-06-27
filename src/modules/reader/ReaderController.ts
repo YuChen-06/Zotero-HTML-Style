@@ -247,13 +247,12 @@ export class ReaderController implements Disposable {
     }
     this.log.debug(`applyToReader: applying theme "${theme}"`);
 
-    const options = this.styleInjector.buildOptionsFromSettings(
-      settings,
+    this.styleInjector.applyToDocumentTree(doc, {
       theme,
-      this.injectScope,
-    );
-
-    this.styleInjector.applyToDocumentTree(doc, options);
+      customVariables: settings.customVariables,
+      scope: this.injectScope,
+      maxFrameDepth: 5,
+    });
   }
 
   /**

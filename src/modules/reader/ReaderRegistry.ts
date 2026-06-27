@@ -21,23 +21,9 @@ import { createLogger } from "../utils/Logger";
 import type { ZoteroReaderInstance } from "./ReaderAdapter";
 
 /**
- * ReaderRegistry：用于跟踪“曾经出现过/仍可能存活”的 Reader 实例集合。
- *
- * 关键设计目标（对应你的审计要求）：
- * - **不能用强引用集合（如 Set<Reader>）**，否则会阻止已关闭 Reader 被 GC 回收，引发内存泄漏；
- * - 需要支持“尽力遍历”以实现热更新：配置变更时，尝试对仍存活的 Reader 重新应用样式。
- *
- * 实现策略说明（为什么同时使用 WeakMap + WeakRef Set）：
- * - `WeakSet/WeakMap` 本身不可遍历，因此无法直接用于“热更新遍历”。
- * - 解决方案：
- *   1) 使用 `WeakMap<Reader, WeakRef<Reader>>` 进行去重（弱键不阻止 GC）。
- *   2) 使用 `Set<WeakRef<Reader>>` 保存可遍历的弱引用包装对象。
- *      - 注意：Set 持有的是 WeakRef 对象本身（不是 Reader），不会阻止 Reader 被回收。
- *   3) 遍历时 `deref()`，若已回收则从 Set 中清理。
- *
- * 兼容性备注：
- * - Zotero 7 基于 Firefox ESR（较新的 SpiderMonkey）通常支持 WeakRef/FinalizationRegistry。
- * - 这里即便没有 FinalizationRegistry 也能工作（只是清理会延迟到下一次遍历）。
+ * Tracks Reader instances using WeakRef for GC-friendly traversal.
+ * Uses WeakMap for dedup + Set<WeakRef> for iteration.
+ * compact() and forEachAlive prune dead refs on each traversal.
  */
 export class ReaderRegistry {
   private readonly log = createLogger("ReaderRegistry");
@@ -48,74 +34,30 @@ export class ReaderRegistry {
   >();
   private readonly refs = new Set<WeakRef<ZoteroReaderInstance>>();
 
-  // ponytail: FinalizationRegistry removed — compact() + forEachAlive cleanup suffice.
-
   public register(reader: ZoteroReaderInstance): void {
     if (this.dedupe.has(reader)) return;
-
     const ref = new WeakRef(reader);
     this.dedupe.set(reader, ref);
     this.refs.add(ref);
   }
 
-  /**
-   * 遍历仍存活的 Reader。
-   *
-   * 输入输出说明：
-   * - 输入：回调函数 `fn`。
-   * - 输出：无。
-   *
-   * 行为说明：
-   * - 本方法是 best-effort：遍历过程中如遇到异常会跳过，不影响其他 Reader。
-   * - 会在遍历时清理已经失效的 WeakRef，避免集合无限增长。
-   */
+  /** Iterate surviving readers. Prunes dead refs. Best-effort on errors. */
   public forEachAlive(fn: (reader: ZoteroReaderInstance) => void): void {
     for (const ref of Array.from(this.refs)) {
       const reader = ref.deref();
-      if (!reader) {
-        this.refs.delete(ref);
-        continue;
-      }
-
-      try {
-        fn(reader);
-      } catch {
-        // best-effort
-      }
+      if (!reader) { this.refs.delete(ref); continue; }
+      try { fn(reader); } catch { /* best-effort */ }
     }
   }
 
-  /**
-   * 估算当前集合中的弱引用数量。
-   *
-   * 注意：
-   * - 这是“弱引用包装对象”的数量，不等价于存活 Reader 数量。
-   * - 主要用于调试与日志观测。
-   */
-  public get weakRefCount(): number {
-    return this.refs.size;
-  }
-
-  /**
-   * 主动触发一次清理。
-   *
-   * 为什么需要：
-   * - 即使有 FinalizationRegistry，回调触发时机也不确定；
-   * - 在热更新/定时维护时主动清理可以减少集合膨胀。
-   */
+  /** Remove dead weak refs. Called before hot-refresh traversal. */
   public compact(): void {
     let removed = 0;
     for (const ref of Array.from(this.refs)) {
-      if (!ref.deref()) {
-        this.refs.delete(ref);
-        removed += 1;
-      }
+      if (!ref.deref()) { this.refs.delete(ref); removed++; }
     }
-
     if (removed > 0) {
-      this.log.debug(
-        `compact: removed=${removed}, weakRefCount=${this.refs.size}`,
-      );
+      this.log.debug(`compact: removed=${removed}, refs=${this.refs.size}`);
     }
   }
 }

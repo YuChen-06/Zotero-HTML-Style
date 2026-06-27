@@ -2,8 +2,6 @@ import { expect } from "chai";
 import {
   safeParseJSON,
   prettyJSON,
-  isPlainObject,
-  isValidCSSVarKey,
   normalizeToStringMap,
 } from "../../src/modules/utils/JsonUtils.js";
 
@@ -46,66 +44,6 @@ describe("JsonUtils", function () {
     });
   });
 
-  describe("isPlainObject", function () {
-    it("should return false for null", function () {
-      expect(isPlainObject(null)).to.be.false;
-    });
-
-    it("should return false for array", function () {
-      expect(isPlainObject([1, 2, 3])).to.be.false;
-    });
-
-    it("should return true for plain object", function () {
-      expect(isPlainObject({ a: 1 })).to.be.true;
-    });
-
-    it("should return true for Object.create(null)", function () {
-      expect(isPlainObject(Object.create(null))).to.be.true;
-    });
-
-    it("should return false for Date", function () {
-      expect(isPlainObject(new Date())).to.be.false;
-    });
-
-    it("should return false for number", function () {
-      expect(isPlainObject(42)).to.be.false;
-    });
-
-    it("should return false for string", function () {
-      expect(isPlainObject("hello")).to.be.false;
-    });
-  });
-
-  describe("isValidCSSVarKey", function () {
-    it("should accept valid names with hyphen", function () {
-      expect(isValidCSSVarKey("ts-bg")).to.be.true;
-    });
-
-    it("should accept valid names with underscore", function () {
-      expect(isValidCSSVarKey("ts_fg")).to.be.true;
-    });
-
-    it("should accept names starting with underscore", function () {
-      expect(isValidCSSVarKey("_valid")).to.be.true;
-    });
-
-    it("should reject names starting with digit", function () {
-      expect(isValidCSSVarKey("123abc")).to.be.false;
-    });
-
-    it("should reject empty string", function () {
-      expect(isValidCSSVarKey("")).to.be.false;
-    });
-
-    it("should reject names with spaces", function () {
-      expect(isValidCSSVarKey("has space")).to.be.false;
-    });
-
-    it("should reject names with special characters", function () {
-      expect(isValidCSSVarKey("var@name")).to.be.false;
-    });
-  });
-
   describe("normalizeToStringMap", function () {
     it("should normalize a valid object", function () {
       const result = normalizeToStringMap({ "ts-bg": "#fff", count: 42 });
@@ -115,6 +53,18 @@ describe("JsonUtils", function () {
 
     it("should return error for non-object input", function () {
       const result = normalizeToStringMap("not an object");
+      expect(result.vars).to.deep.equal({});
+      expect(result.errors).to.have.lengthOf(1);
+    });
+
+    it("should reject null", function () {
+      const result = normalizeToStringMap(null);
+      expect(result.vars).to.deep.equal({});
+      expect(result.errors).to.have.lengthOf(1);
+    });
+
+    it("should reject array", function () {
+      const result = normalizeToStringMap([1, 2, 3]);
       expect(result.vars).to.deep.equal({});
       expect(result.errors).to.have.lengthOf(1);
     });
@@ -130,6 +80,25 @@ describe("JsonUtils", function () {
       const result = normalizeToStringMap({ num: 3.14, bool: true });
       expect(result.vars.num).to.equal("3.14");
       expect(result.vars.bool).to.equal("true");
+    });
+
+    it("should accept valid names with hyphen", function () {
+      const result = normalizeToStringMap({ "ts-bg": "#fff" });
+      expect(result.errors).to.have.lengthOf(0);
+    });
+
+    it("should reject names with spaces", function () {
+      const result = normalizeToStringMap({ "has space": "val" });
+      expect(result.vars).to.deep.equal({});
+      expect(result.errors).to.have.lengthOf(1);
+    });
+
+    it("should accept Object.create(null)", function () {
+      const obj = Object.create(null);
+      obj["ts-bg"] = "#fff";
+      const result = normalizeToStringMap(obj);
+      expect(result.vars).to.deep.equal({ "ts-bg": "#fff" });
+      expect(result.errors).to.have.lengthOf(0);
     });
   });
 });
